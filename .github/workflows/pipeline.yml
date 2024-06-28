@@ -8,6 +8,10 @@ on:
     branches:
       - adding-gh-workflow-DTSPO-18103
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   precheck-sbox:
     runs-on: ubuntu-latest
