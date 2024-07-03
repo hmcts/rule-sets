@@ -1,8 +1,8 @@
-# variable "github_token" {
-#   description = "GitHub token to use for authentication."
-#   type        = string
-#   sensitive   = true
-# }
+variable "github_token" {
+  description = "GitHub token to use for authentication."
+  type        = string
+  sensitive   = true
+}
 
 # variable "repositories" {
 #   description = "List of repositories to apply branch protection rules"

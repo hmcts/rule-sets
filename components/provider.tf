@@ -1,7 +1,7 @@
-# provider "github" {
-#   token = var.github_token
-#   owner = "hmcts"
-# }
+provider "github" {
+  token = var.github_token
+  owner = "hmcts"
+}
 
 terraform {
   required_version = ">= 1.3.6"
