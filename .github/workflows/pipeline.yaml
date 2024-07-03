@@ -3,10 +3,10 @@ name: Rule Sets Pipeline
 on:
   pull_request:
     branches:
-      - adding-gh-workflow-DTSPO-18103
+      - rule-sets-DTSPO-17918
   push:
     branches:
-      - adding-gh-workflow-DTSPO-18103
+      - rule-sets-DTSPO-17918
 
 permissions:
   id-token: write
