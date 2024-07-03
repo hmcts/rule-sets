@@ -69,3 +69,4 @@ jobs:
           ARM_USE_OIDC: true
         run: |
           terraform apply -auto-approve tfplan
+          
