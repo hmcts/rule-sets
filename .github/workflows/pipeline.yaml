@@ -35,9 +35,11 @@ jobs:
         working-directory: components
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           terraform init \
             -backend-config="subscription_id=${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}"
           terraform plan \
             -var="location=UK South" \
-            -var="override_action=plan"
+            -var="override_action=plan" \
+            -var="github_token=${{ secrets.PAT_TOKEN }}"
