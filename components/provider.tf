@@ -19,3 +19,12 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+terraform {
+  backend "azurerm" {
+    resource_group_name   = "rule-set-rg"
+    storage_account_name  = "rulesetsa"
+    container_name        = "tfstate"
+    key                   = "terraform.tfstate"
+  }
+}

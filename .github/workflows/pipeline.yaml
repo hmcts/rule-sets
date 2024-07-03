@@ -25,20 +25,29 @@ jobs:
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
           az account set --subscription ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
-      - name: Use Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
       - name: Change directory to Terraform config
         run: cd components
 
-      - name: Precheck Terraform
+      - name: Initialize Terraform
+        working-directory: components
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=rule-set-rg" \
+            -backend-config="storage_account_name=rulesetsa" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=terraform.tfstate"
+
+      - name: Plan Terraform
         working-directory: components
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          terraform init \
-            -backend-config="subscription_id=${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}"
           terraform plan \
             -var="location=UK South" \
             -var="override_action=plan" \
