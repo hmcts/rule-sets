@@ -53,7 +53,7 @@ resource "github_branch_protection_v3" "branch_protection" {
   required_pull_request_reviews {
     dismiss_stale_reviews           = true
     require_code_owner_reviews      = false
-    required_approving_review_count = 2 # Ensure at least 1 reviewer
+    required_approving_review_count = 1 # Ensure at least 1 reviewer
   }
 
   restrictions {
