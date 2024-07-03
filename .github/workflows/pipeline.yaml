@@ -12,7 +12,7 @@ permissions:
   id-token: write
   contents: read
 
-jobs: 
+jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
@@ -50,9 +50,8 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        
         run: |
           terraform plan -out=tfplan \
             -var="location=UK South" \
-            -var="override_action=plan" \
+            -var="override_action=plan"
           terraform apply -auto-approve tfplan
