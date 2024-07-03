@@ -16,6 +16,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: 'Az CLI login'
         uses: azure/login@v1
         with:
@@ -27,7 +30,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
 
       - name: Initialize Terraform
-        working-directory: components
+        working-directory: ./components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -41,7 +44,7 @@ jobs:
             -backend-config="key=terraform.tfstate"
 
       - name: Plan and Apply Terraform
-        working-directory: components
+        working-directory: ./components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
