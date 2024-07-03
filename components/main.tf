@@ -1,3 +1,10 @@
+module "tags" {
+  source      = "git::https://github.com/hmcts/terraform-module-common-tags.git?ref=master"
+  environment = var.env
+  product     = var.product
+  builtFrom   = var.builtFrom
+}
+
 # Check if branches exist
 data "github_branch" "existing_branches" {
   for_each = { for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo }
