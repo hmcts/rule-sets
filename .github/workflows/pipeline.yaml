@@ -21,22 +21,40 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Log in to Azure
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Use Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
       - name: Change directory to Terraform config
         run: cd components
 
-      - name: Precheck Terraform
+      - name: Initialize Terraform
         working-directory: components
         env:
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=rule-set-rg" \
+            -backend-config="storage_account_name=rulesetsa" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=terraform.tfstate"
+
+      - name: Plan Terraform
+        working-directory: components
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          terraform init -backend-config="subscription_id=${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}"
-          terraform plan -var="location=UK South" -var="override_action=plan" -var="github_token=${{ secrets.PAT_TOKEN }}"
-          
+          terraform plan \
+            -var="location=UK South" \
+            -var="override_action=plan" \
+            -var="github_token=${{ secrets.PAT_TOKEN }}"
