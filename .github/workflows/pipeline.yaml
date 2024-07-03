@@ -32,7 +32,7 @@ jobs:
         run: cd components/lab
 
       - name: Precheck Terraform
-        working-directory: components/lab
+        working-directory: components
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         run: |
