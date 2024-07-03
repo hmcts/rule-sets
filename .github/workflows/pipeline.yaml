@@ -60,3 +60,4 @@ jobs:
             -var="override_action=plan" \
             -var="github_token=${{ secrets.PAT_TOKEN }}"
           terraform apply -auto-approve tfplan
+          
