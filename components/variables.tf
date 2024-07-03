@@ -30,3 +30,13 @@ variable "excluded_repositories" {
     "repo-to-exclude"
   ]
 }
+
+variable "override_action" {
+  description = "The action to override"
+  type        = string
+}
+
+variable "location" {
+  description = "The location for the resources"
+  type        = string
+}
