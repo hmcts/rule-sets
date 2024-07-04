@@ -11,28 +11,28 @@ on:
 permissions:
   id-token: write
   contents: read
-  packages: write
-  actions: write
  
 jobs:
-  build-and-deploy:
+  plan-and-apply:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
  
-      - name: 'Az CLI login'
+      - name: Log in to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
  
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
  
+      - name: Change directory to Terraform config
+        run: cd components
+ 
       - name: Initialize Terraform
-        working-directory: ./components
+        working-directory: components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -45,24 +45,17 @@ jobs:
             -backend-config="container_name=tfstate" \
             -backend-config="key=terraform.tfstate"
  
-      - name: Plan Terraform
-        working-directory: ./components
+      - name: Plan and Apply Terraform
+        working-directory: components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           terraform plan -out=tfplan \
             -var="location=UK South" \
-            -var="override_action=plan"
- 
-      - name: Apply Terraform
-        working-directory: ./components
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: |
+            -var="override_action=plan" \
+            -var="github_token=${{ secrets.PAT_TOKEN }}"
           terraform apply -auto-approve tfplan
