@@ -36,7 +36,7 @@ variable "excluded_repositories" {
 variable "override_action" {
   description = "The action to override"
   type        = string
-  default = "true"
+  default = "plan"
 }
 
 variable "location" {
