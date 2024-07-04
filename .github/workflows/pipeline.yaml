@@ -27,6 +27,20 @@ jobs:
  
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+
+      - name: Install jq and gh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Run branch protection script
+        run: ./check_branch_protection.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
  
       - name: Change directory to Terraform config
         run: cd components
