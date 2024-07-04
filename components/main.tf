@@ -40,12 +40,11 @@ data "github_branch" "existing_branches" {
   branch     = each.value.branch
 }
 
-# Apply branch protection rules only if the branch exists and is not already protected
+# Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
   for_each = {
     for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo
-    if try(data.github_branch.existing_branches["${combo.repo}:${combo.branch}"].branch, null) != null && 
-       try(github_branch_protection_v3.branch_protection["${combo.repo}:${combo.branch}"].branch, null) == null
+    if try(data.github_branch.existing_branches["${combo.repo}:${combo.branch}"].branch, null) != null
   }
 
   repository     = each.value.repo
