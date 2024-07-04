@@ -29,7 +29,7 @@ resource "azurerm_storage_container" "tfstate" {
 
 # Check if branches exist
 data "github_branch" "existing_branches" {
-  for_each = { for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo }
+  for_each   = { for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo }
   repository = each.value.repo
   branch     = each.value.branch
 }
@@ -43,7 +43,7 @@ resource "github_branch_protection_v3" "branch_protection" {
 
   repository     = each.value.repo
   branch         = each.value.branch
-  enforce_admins = false # Excludes organization admins
+  enforce_admins = false # Excludes organisation admins
 
   required_status_checks {
     strict   = true
