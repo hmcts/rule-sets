@@ -27,7 +27,7 @@ variable "excluded_repositories" {
   description = "List of repositories to exclude from branch protection rules"
   type        = list(string)
   default = [
-    "rule-set-test-repo4"
+    # "rule-set-test-repo4"
   ]
 }
 
