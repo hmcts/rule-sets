@@ -33,7 +33,7 @@ jobs:
           curl -sSL https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_linux_amd64.tar.gz | sudo tar xz -C /usr/local/bin --strip-components=2 gh_2.4.0_linux_amd64/bin/gh
 
       - name: Run branch protection script
-        run: ./check_branch_protection.sh
+        run: check_branch_protection.sh
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
  
