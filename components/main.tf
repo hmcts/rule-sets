@@ -27,11 +27,6 @@ resource "azurerm_storage_container" "tfstate" {
 
 }
 
-# Output existing branches for debugging
-output "existing_branches" {
-  value = data.github_branch.existing_branches
-}
-
 # Check if branches exist
 data "github_branch" "existing_branches" {
   for_each   = { for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo }
@@ -43,6 +38,7 @@ data "github_branch" "existing_branches" {
 resource "github_branch_protection_v3" "branch_protection" {
   for_each = {
     for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo
+    if try(data.github_branch.existing_branches["${combo.repo}:${combo.branch}"].branch, null) != null
   }
 
   repository     = each.value.repo
@@ -64,12 +60,5 @@ resource "github_branch_protection_v3" "branch_protection" {
     users = []
     teams = []
     apps  = []
-  }
-
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to the branch protection rules
-      etag
-    ]
   }
 }
