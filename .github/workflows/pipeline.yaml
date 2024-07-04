@@ -30,11 +30,6 @@ jobs:
 
       - name: Initialize Terraform
         working-directory: components
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           terraform init \
             -backend-config="resource_group_name=rule-set-rg" \
@@ -42,10 +37,14 @@ jobs:
             -backend-config="container_name=tfstate" \
             -backend-config="key=terraform.tfstate"
 
-      - name: Plan Terraform
+      - name: Plan and Apply Terraform
         working-directory: components
-        run: terraform plan -out=tfplan -var-file="terraform.tfvars"
-
-      - name: Apply Terraform
-        working-directory: components
-        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          terraform plan -out=tfplan -var-file="terraform.tfvars"
+          terraform apply -auto-approve tfplan
