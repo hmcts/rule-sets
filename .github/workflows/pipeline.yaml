@@ -36,9 +36,13 @@ jobs:
         run: chmod +x ./components/check_branch_protection.sh
       
       - name: Run branch protection script
-        run: ./components/check_branch_protection.sh
+        run: |
+          chmod +x ./components/check_branch_protection.sh
+          ./components/check_branch_protection.sh
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          TF_CLI_ARGS_apply: "-auto-approve"
+      
  
       - name: Change directory to Terraform config
         run: cd components
