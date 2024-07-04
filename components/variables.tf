@@ -18,13 +18,15 @@ variable "excluded_repositories" {
   type        = list(string)
   default = [
     # "rule-set-test-repo5"
+    "rule-set-test-repo7",
+    "rule-set-test-repo8"
   ]
 }
 
 variable "override_action" {
   description = "The action to override"
   type        = string
-  default = "plan"
+  default     = "plan"
 }
 
 variable "location" {
