@@ -22,7 +22,7 @@ locals {
 
   # Filter out excluded repositories
   included_repositories = [
-    for repo in local.repositories_list : repo
+    for repo in local.repositories_list : repo 
     if !contains(var.excluded_repositories, repo)
   ]
 
