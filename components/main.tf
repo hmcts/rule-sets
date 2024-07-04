@@ -34,6 +34,11 @@ data "github_branch" "existing_branches" {
   branch     = each.value.branch
 }
 
+# Output existing branches for debugging
+output "existing_branches" {
+  value = data.github_branch.existing_branches
+}
+
 # Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
   for_each = {
@@ -62,6 +67,7 @@ resource "github_branch_protection_v3" "branch_protection" {
     apps  = []
   }
 }
+
 
 output "existing_branches" {
   value = data.github_branch.existing_branches
