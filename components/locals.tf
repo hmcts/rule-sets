@@ -20,9 +20,9 @@ locals {
   # Read the repositories list from the JSON file
   repositories_list = jsondecode(file("${path.module}/test-repos.json"))
 
-  # Filter out excluded repositories using a function instead of inline comprehension
+  # Filter out excluded repositories
   included_repositories = [
-    for repo in local.repositories_list : repo
+    for repo in local.repositories_list : repo 
     if !contains(var.excluded_repositories, repo)
   ]
 
@@ -36,6 +36,7 @@ locals {
     ]
   ])
 }
+
 
 
 
