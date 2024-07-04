@@ -17,13 +17,18 @@
 # }
 
 locals {
-  # Read the repositories from the JSON file
-  repositories_json = file("${path.module}./test-repos.json")
-  repositories_data = jsondecode(local.repositories_json)
+  # Read the repositories list from the JSON file
+  repositories_list = jsondecode(file("${path.module}/test-repos.json"))
 
-  # Create combinations of repositories and branches
+  # Filter out excluded repositories using a function instead of inline comprehension
+  included_repositories = [
+    for repo in local.repositories_list : repo
+    if !contains(var.excluded_repositories, repo)
+  ]
+
+  # Create a combination of repositories and branches
   repo_branch_combinations = flatten([
-    for repo in local.repositories_data : [
+    for repo in local.included_repositories : [
       for branch in var.branches : {
         repo   = repo
         branch = branch
@@ -31,6 +36,11 @@ locals {
     ]
   ])
 }
+
+
+
+
+
 
 locals {
   env_display_names = {
