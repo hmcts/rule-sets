@@ -67,8 +67,3 @@ resource "github_branch_protection_v3" "branch_protection" {
     apps  = []
   }
 }
-
-
-output "existing_branches" {
-  value = data.github_branch.existing_branches
-}
