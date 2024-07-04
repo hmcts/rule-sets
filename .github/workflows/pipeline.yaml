@@ -26,7 +26,6 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_OIDC }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID_OIDC }}
           subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-          allow-no-subscriptions: true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
