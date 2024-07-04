@@ -5,3 +5,11 @@ output "common_tags" {
     BuiltFrom   = var.builtFrom
   }
 }
+
+output "included_repositories" {
+  value = local.included_repositories
+}
+
+output "repo_branch_combinations" {
+  value = local.repo_branch_combinations
+}
