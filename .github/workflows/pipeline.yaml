@@ -45,7 +45,7 @@ jobs:
             -backend-config="container_name=tfstate" \
             -backend-config="key=terraform.tfstate"
  
-      - name: Plan and Apply Terraform
+      - name: Plan Terraform
         working-directory: ./components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -56,4 +56,13 @@ jobs:
           terraform plan -out=tfplan \
             -var="location=UK South" \
             -var="override_action=plan"
+ 
+      - name: Apply Terraform
+        working-directory: ./components
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
           terraform apply -auto-approve tfplan
