@@ -1,7 +1,7 @@
-name: Pull Request
+name: Push
 
 on:
-  pull_request:
+  push:
     branches:
       - rule-sets-DTSPO-17918
 
@@ -10,11 +10,9 @@ env:
 
 permissions:
       id-token: write
-      issues: write
-      pull-requests: write
       contents: read
 jobs: 
-  pr-infra-check:
+  deploy-infra:
     runs-on: ubuntu-latest
     steps:
     # Checkout the repository to the GitHub Actions runner
@@ -38,35 +36,23 @@ jobs:
       run: |
         az account show
 
-        - name: Initialize and Plan Terraform
-        working-directory: ./components
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    # Run Terraform init
+    - name: Terraform Init
+      id: init
+      env:
+        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
 
-  
-    # Run a Terraform fmt
-    - name: Terraform format
-      id: fmt
-      run: terraform fmt -check
-
-    # Run a Terraform validate
-    - name: Terraform validate
-      id: validate
-      if: success() || failure()
+    # Run a Terraform apply
+    - name: Terraform apply
+      id: apply
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform validate -no-color
-
-    # Run a Terraform plan
-    - name: Terraform plan
-      id: plan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform plan -no-color
+      run: terraform apply -auto-approve
