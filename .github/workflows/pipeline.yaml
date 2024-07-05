@@ -8,12 +8,12 @@ on:
 permissions:
   id-token: write
   contents: read
-  actions: write  # Allow the action to create temporary tokens
+  actions: write
 
 env:
   TF_LOG: INFO
 
-jobs: 
+jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     steps:
@@ -34,17 +34,23 @@ jobs:
       run: |
         az account show
 
-    - name: Echo environment variables
+    - name: Debug Repositories and Branches
       run: |
-        echo "STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}"
-        echo "CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}"
-        echo "RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}"
-        echo "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"  # This will print the token value
-      env:
-        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
-        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        echo "Checking Repositories and Branches"
+        echo ${{ toJSON(fromJSON(file(steps.workspace))['test-repos.json']) }}
+        for repo in $(jq -r '.[]' test-repos.json); do
+          echo "Checking repository: $repo"
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/hmcts/$repo
+
+          for branch in main master; do
+            echo "Checking branch: $branch in repository: $repo"
+            curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                 -H "Accept: application/vnd.github.v3+json" \
+                 https://api.github.com/repos/hmcts/$repo/branches/$branch
+          done
+        done
 
     - name: Terraform Init and Plan
       id: plan
