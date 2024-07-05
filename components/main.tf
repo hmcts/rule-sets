@@ -5,14 +5,8 @@ module "tags" {
   builtFrom   = var.builtFrom
 }
 
-resource "azurerm_resource_group" "rg-test" {
-  name     = var.resource_group_name
-  location = var.location
-  tags     = module.tags.common_tags
-}
-
 resource "azurerm_resource_group" "rg" {
-  name     = "test"
+  name     = var.resource_group_name
   location = var.location
   tags     = module.tags.common_tags
 }
@@ -30,7 +24,6 @@ resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
   storage_account_name  = azurerm_storage_account.sa.name
   container_access_type = "private"
-
 }
 
 # Check if repositories exist
