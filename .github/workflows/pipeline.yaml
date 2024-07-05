@@ -50,7 +50,7 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform plan -var-file="components/terraform.tfvars"
+      run: terraform plan -var-file="terraform.tfvars"
 
     - name: Terraform Apply
       working-directory: components
@@ -58,4 +58,4 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform apply -var-file="components/terraform.tfvars" -auto-approve
+      run: terraform apply -var-file="terraform.tfvars" -auto-approve
