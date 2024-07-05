@@ -11,6 +11,10 @@ on:
 permissions:
   id-token: write
   contents: read
+  actions: write
+  checks: write
+  pull-requests: write
+  statuses: write
 
 jobs:
   plan:
@@ -23,15 +27,20 @@ jobs:
       - name: Log in to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
       - name: Generate GitHub Token
         id: generate_token
-        run: |
-          echo "GITHUB_TOKEN=$(curl -s -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_API_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/token | jq -r .token)" >> $GITHUB_ENV
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const token = await github.rest.actions.createWorkflowAccessToken({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            core.exportVariable('GITHUB_TOKEN', token.data.token);
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
@@ -73,7 +82,9 @@ jobs:
       - name: Log in to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
