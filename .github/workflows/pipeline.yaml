@@ -37,6 +37,17 @@ jobs:
       run: |
         az account show
 
+    # Echo environment variables to debug
+    - name: Echo environment variables
+      run: |
+        echo "STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}"
+        echo "CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}"
+        echo "RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}"
+      env:
+        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+
     # Run Terraform init and plan
     - name: Terraform Init and Plan
       id: plan
