@@ -4,7 +4,7 @@ provider "azurerm" {
 
 provider "github" {
   owner = "hmcts"
-  # token = var.github_token
+  token = var.github_token
 }
 
 terraform {
