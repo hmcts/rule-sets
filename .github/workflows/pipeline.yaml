@@ -1,5 +1,5 @@
 name: Rule Sets Pipeline
- 
+
 on:
   pull_request:
     branches:
@@ -7,11 +7,11 @@ on:
   push:
     branches:
       - rule-sets-DTSPO-17918
- 
+
 permissions:
   id-token: write
   contents: read
- 
+
 jobs:
   plan-and-apply:
     runs-on: ubuntu-latest
@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
- 
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
@@ -27,13 +27,13 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.DCD_CFT_AZURE_SUBSCRIPTION_ID }}
           enable-AzPSSession: false
-          
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
- 
+
       - name: Change directory to Terraform config
         run: cd components
- 
+
       - name: Initialize Terraform
         working-directory: components
         env:
@@ -47,7 +47,7 @@ jobs:
             -backend-config="storage_account_name=rulesetsa" \
             -backend-config="container_name=tfstate" \
             -backend-config="key=terraform.tfstate"
- 
+
       - name: Plan and Apply Terraform
         working-directory: components
         env:
