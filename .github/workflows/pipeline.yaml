@@ -80,3 +80,4 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: terraform apply -auto-approve tfplan
+      
