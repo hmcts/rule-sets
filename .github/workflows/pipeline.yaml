@@ -52,6 +52,7 @@ jobs:
 
     # Run a Terraform plan
     - name: Terraform plan
+      working-directory: ./components
       id: plan
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -63,6 +64,7 @@ jobs:
 
     # Run a Terraform apply
     - name: Terraform apply
+      working-directory: ./components
       id: apply
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
