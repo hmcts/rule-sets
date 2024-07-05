@@ -1,107 +1,72 @@
-name: Rule Sets Pipeline
+name: Pull Request
 
 on:
   pull_request:
     branches:
-      - rule-sets-DTSPO-17918
-  push:
-    branches:
-      - rule-sets-DTSPO-17918
+      - main
+
+env:
+  TF_LOG: INFO
 
 permissions:
-  id-token: write
-  contents: read
-  actions: write
-  checks: write
-  pull-requests: write
-  statuses: write
-
-jobs:
-  plan:
+      id-token: write
+      issues: write
+      pull-requests: write
+      contents: read
+jobs: 
+  pr-infra-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+    # Install the latest version of Terraform CLI 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      
+    # Log into Azure with OIDC integration
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION_SUBSCRIPTION_ID }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.5.7
+    # Run az commands to confirm sub access
+    - name: 'Run az commands'
+      run: |
+        az account show
 
-      - name: Initialize and Plan Terraform
+        - name: Initialize and Plan Terraform
         working-directory: ./components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-          TF_LOG: DEBUG
-        run: |
-          terraform init -backend-config="resource_group_name=rule-set-rg" \
-            -backend-config="storage_account_name=rulesetsa" \
-            -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate" \
-            -backend-config="use_oidc=true" \
-            -backend-config="use_azuread_auth=true"
-          terraform plan -out=tfplan \
-            -var="location=UK South" \
-            -var="override_action=plan" \
-            -var="github_token=${{ secrets.PAT_TOKEN }}"
 
-      - name: Upload Terraform plan
-        uses: actions/upload-artifact@v2
-        with:
-          name: tfplan
-          path: components/tfplan
+  
+    # Run a Terraform fmt
+    - name: Terraform format
+      id: fmt
+      run: terraform fmt -check
 
-  apply:
-    runs-on: ubuntu-latest
-    needs: plan
-    timeout-minutes: 60
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    # Run a Terraform validate
+    - name: Terraform validate
+      id: validate
+      if: success() || failure()
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      run: terraform validate -no-color
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.5.7
-
-      - name: Download Terraform plan
-        uses: actions/download-artifact@v2
-        with:
-          name: tfplan
-          path: components
-
-      - name: Initialize and Apply Terraform
-        working-directory: ./components
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          terraform init -backend-config="resource_group_name=rule-set-rg" \
-            -backend-config="storage_account_name=rulesetsa" \
-            -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate" \
-            -backend-config="use_oidc=true" \
-            -backend-config="use_azuread_auth=true"
-          terraform apply -auto-approve tfplan
+    # Run a Terraform plan
+    - name: Terraform plan
+      id: plan
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      run: terraform plan -no-color
