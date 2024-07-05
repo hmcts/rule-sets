@@ -40,7 +40,7 @@ jobs:
     - name: List all Repositories and Branches from JSON file
       run: |
         echo "Checking Repositories and Branches"
-        cat ./components/test-repos.json
+        cat ./test-repos.json
         for repo in $(jq -r '.[]' ./components/test-repos.json); do
           echo "Checking repository: $repo"
           curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
