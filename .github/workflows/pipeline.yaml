@@ -34,11 +34,15 @@ jobs:
       run: |
         az account show
 
+    - name: Install jq
+      run: |
+        sudo apt-get install jq -y
+
     - name: Debug Repositories and Branches
       run: |
         echo "Checking Repositories and Branches"
-        echo ${{ toJSON(fromJSON(file(steps.workspace))['test-repos.json']) }}
-        for repo in $(jq -r '.[]' test-repos.json); do
+        cat ./components/test-repos.json
+        for repo in $(jq -r '.[]' ./components/test-repos.json); do
           echo "Checking repository: $repo"
           curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
