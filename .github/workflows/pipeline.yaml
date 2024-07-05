@@ -57,3 +57,4 @@ jobs:
             -var="location=UK South" \
             -var="override_action=plan"
           terraform apply -auto-approve tfplan
+          
