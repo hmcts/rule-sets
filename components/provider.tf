@@ -8,7 +8,7 @@ provider "github" {
 }
 
 terraform {
-  required_version = ">= 1.4.0"
+  required_version = ">= 1.5.7"
 
   backend "azurerm" {
     resource_group_name  = "rule-set-rg"
