@@ -9,23 +9,21 @@ env:
   TF_LOG: INFO
 
 permissions:
-      id-token: write
-      issues: write
-      pull-requests: write
-      contents: read
+  id-token: write
+  issues: write
+  pull-requests: write
+  contents: read
+
 jobs: 
   pr-infra-check:
     runs-on: ubuntu-latest
     steps:
-    # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Install the latest version of Terraform CLI 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       
-    # Log into Azure with OIDC integration
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
@@ -33,14 +31,12 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
-    # Run az commands to confirm sub access
     - name: 'Run az commands'
       run: |
         az account show
 
-    # Run Terraform init
     - name: Terraform Init
-      id: init
+      working-directory: components
       env:
         STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
         CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
@@ -50,24 +46,20 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
 
-    # Run a Terraform fmt
     - name: Terraform format
       working-directory: components
       id: fmt
       run: terraform fmt -check
 
-    # Run a Terraform validate
     - name: Terraform validate
       working-directory: components
       id: validate
-      if: success() || failure()
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       run: terraform validate -no-color
 
-    # Run a Terraform plan
     - name: Terraform plan
       working-directory: components
       id: plan
@@ -75,4 +67,5 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform plan -no-color
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}" -no-color
