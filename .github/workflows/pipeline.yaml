@@ -3,7 +3,7 @@ name: Push
 on:
   push:
     branches:
-      - rule-sets-DTSPO-17918
+      - master
 
 env:
   TF_LOG: INFO
@@ -12,7 +12,7 @@ permissions:
   id-token: write
   contents: read
 
-jobs:
+jobs: 
   deploy-infra:
     runs-on: ubuntu-latest
     steps:
@@ -36,17 +36,17 @@ jobs:
     - name: Install jq
       run: |
         sudo apt-get install jq -y
-
-    - name: List all Repositories and Branches from JSON file
+  
+    - name: Debug Repositories and Branches
       run: |
         echo "Checking Repositories and Branches"
-        cat ./test-repos.json
-        for repo in $(jq -r '.[]' ./test-repos.json); do
+        cat ./components/test-repos.json
+        for repo in $(jq -r '.[]' ./components/test-repos.json); do
           echo "Checking repository: $repo"
           curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/hmcts/$repo
-
+  
           for branch in main master; do
             echo "Checking branch: $branch in repository: $repo"
             curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
