@@ -22,6 +22,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
 
+    # Log into Azure with OIDC integration  
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
@@ -33,6 +34,7 @@ jobs:
       run: |
         sudo apt-get install jq -y
   
+    # List all the repos and branches that the rules are going to be applied on
     - name: List Repositories and Branches
       run: |
         echo "Checking Repositories and Branches"
