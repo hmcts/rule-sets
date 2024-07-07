@@ -52,11 +52,13 @@ jobs:
 
     # Run a Terraform fmt
     - name: Terraform format
+      working-directory: components
       id: fmt
       run: terraform fmt -check
 
     # Run a Terraform validate
     - name: Terraform validate
+      working-directory: components
       id: validate
       if: success() || failure()
       env:
@@ -67,6 +69,7 @@ jobs:
 
     # Run a Terraform plan
     - name: Terraform plan
+      working-directory: components
       id: plan
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
