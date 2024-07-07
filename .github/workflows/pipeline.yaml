@@ -29,15 +29,11 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
-    - name: 'Run az commands'
-      run: |
-        az account show
-
     - name: Install jq
       run: |
         sudo apt-get install jq -y
   
-    - name: Debug Repositories and Branches
+    - name: List Repositories and Branches
       run: |
         echo "Checking Repositories and Branches"
         cat ./components/test-repos.json
