@@ -38,8 +38,8 @@ jobs:
     - name: List Repositories and Branches
       run: |
         echo "Checking Repositories and Branches"
-        cat ./test-repos.json
-        for repo in $(jq -r '.[]' ./test-repos.json); do
+        cat ./components/test-repos.json
+        for repo in $(jq -r '.[]' ./components/test-repos.json); do
           echo "Checking repository: $repo"
           curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
@@ -59,7 +59,11 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+      run: terraform init -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT }}" -backend-config="container_name=${{ env.CONTAINER_NAME }}" -backend-config="resource_group_name=${{ env.RESOURCE_GROUP_NAME }}" -reconfigure
 
     - name: Terraform Plan
       working-directory: components
@@ -67,6 +71,7 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}"
 
@@ -76,5 +81,6 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: terraform apply -var="github_token=${{ secrets.PAT_TOKEN }}" -auto-approve
