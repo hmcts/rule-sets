@@ -15,7 +15,10 @@ terraform {
     storage_account_name = "rulesetsa"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
+    use_oidc             = true
+    use_azuread_auth     = true
   }
+
 
   required_providers {
     azurerm = {
