@@ -8,6 +8,7 @@ on:
 jobs:
   update-file:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
 
     steps:
     - name: Checkout repository
@@ -32,7 +33,7 @@ jobs:
         git config --global user.email 'github-platform-operations@HMCTS.NET'
     
     - name: Pull latest changes with merge
-      run: git pull origin test-workflow --no-rebase
+      run: git pull origin master --no-rebase
     
     - name: Commit changes
       run: |
@@ -56,6 +57,6 @@ jobs:
       run: gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
 
     - name: Create Pull Request
-      run: gh pr create --title "Automated Update Repository List" --body "This PR was created automatically to update the repository list." --head update-repo-list --base test-workflow
+      run: gh pr create --title "Automated Update Repository List" --body "This PR was created automatically to update the repository list." --head update-repo-list --base master
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
