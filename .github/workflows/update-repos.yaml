@@ -32,7 +32,9 @@ jobs:
         git config --global user.email 'github-platform-operations@HMCTS.NET'
     
     - name: Pull latest changes with merge
-      run: git pull origin master --allow-unrelated-histories
+      run: |
+        git config pull.rebase false
+        git pull origin master --allow-unrelated-histories
     
     - name: Commit changes
       run: |
