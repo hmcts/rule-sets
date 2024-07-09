@@ -3,7 +3,7 @@ locals {
 
   # Extract repository names and ensure uniqueness
   repositories_list = distinct([
-    for repo in local.raw_repositories_list : 
+    for repo in local.raw_repositories_list :
     regex("[a-zA-Z0-9-_/]+", replace(repo, "^https://github.com/(.*?)(?:\\.git)?(?:\\?.*)?$", "$1"))
   ])
 
