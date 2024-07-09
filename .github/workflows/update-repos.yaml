@@ -26,12 +26,36 @@ jobs:
     - name: Run update script
       run: python scripts/update-repo-list.py
 
-    - name: Commit and push changes
+    - name: Configure Git
       run: |
         git config --global user.name 'hmcts-platform-operations'
         git config --global user.email 'github-platform-operations@HMCTS.NET'
+    
+    - name: Pull latest changes with merge
+      run: git pull origin test-workflow --no-rebase
+    
+    - name: Commit changes
+      run: |
+        git checkout -b update-repo-list
         git add production-repos.json
         git commit -m 'Update repository list'
-        git push
+    
+    - name: Push changes to new branch
+      run: git push --set-upstream origin update-repo-list
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install GitHub CLI
+      run: |
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        sudo apt-add-repository https://cli.github.com/packages
+        sudo apt-get update
+        sudo apt-get install gh -y
+
+    - name: Authenticate GitHub CLI
+      run: gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+
+    - name: Create Pull Request
+      run: gh pr create --title "Automated Update Repository List" --body "This PR was created automatically to update the repository list." --head update-repo-list --base test-workflow
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
