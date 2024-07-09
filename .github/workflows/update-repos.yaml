@@ -8,7 +8,6 @@ on:
 jobs:
   update-file:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
 
     steps:
     - name: Checkout repository
@@ -59,4 +58,4 @@ jobs:
     - name: Create Pull Request
       run: gh pr create --title "Automated Update Repository List" --body "This PR was created automatically to update the repository list." --head update-repo-list --base master
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
