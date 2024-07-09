@@ -1,20 +1,16 @@
 locals {
-  # Read the repositories list from the JSON file
   raw_repositories_list = jsondecode(file("${path.module}/../production-repos.json"))
 
-  # Clean the repositories list to remove .git and any query parameters
-  repositories_list = [
+  repositories_list = distinct([
     for repo in local.raw_repositories_list :
     regex("[a-zA-Z0-9-_/]+", replace(repo, "\\?.*", ""))
-  ]
+  ])
 
-  # Filter out excluded repositories
   included_repositories = [
     for repo in local.repositories_list : repo
     if !contains(var.excluded_repositories, repo)
   ]
 
-  # Generate combinations of repositories and branches
   repo_branch_combinations = flatten([
     for repo in local.included_repositories : [
       for branch in var.branches : {
@@ -24,6 +20,7 @@ locals {
     ]
   ])
 }
+
 
 
 locals {
