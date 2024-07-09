@@ -29,7 +29,7 @@ resource "azurerm_storage_container" "tfstate" {
 # Check if repositories exist
 data "github_repository" "existing_repos" {
   for_each = { for repo in local.included_repositories : repo => repo }
-  name     = each.key
+  name     = each.value
 }
 
 # Check if branches exist
