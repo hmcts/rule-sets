@@ -32,7 +32,7 @@ jobs:
         git config --global user.email 'github-platform-operations@HMCTS.NET'
     
     - name: Pull latest changes with merge
-      run: git pull origin master --no-rebase
+      run: git pull origin master --allow-unrelated-histories
     
     - name: Commit changes
       run: |
@@ -58,4 +58,4 @@ jobs:
     - name: Create Pull Request
       run: gh pr create --title "Automated Update Repository List" --body "This PR was created automatically to update the repository list." --head update-repo-list --base master
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
