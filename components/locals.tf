@@ -3,7 +3,7 @@ locals {
 
   # Extract repository names from URLs
   repositories_list = distinct([
-    for repo in local.raw_repositories_list : 
+    for repo in local.raw_repositories_list :
     replace(replace(repo, "^https://github.com/", ""), "\\.git.*", "")
   ])
 
