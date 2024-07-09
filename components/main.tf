@@ -28,23 +28,16 @@ resource "azurerm_storage_container" "tfstate" {
 
 # Check if repositories exist
 data "github_repository" "existing_repos" {
-  for_each = {
-    for repo in local.included_repositories : repo => repo
-  }
-  name = each.value
+  for_each = { for repo in local.included_repositories : repo => repo }
+  name     = each.key
 }
-
 
 # Check if branches exist
 data "github_branch" "existing_branches" {
-  for_each = {
-    for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo
-    if contains(keys(data.github_repository.existing_repos), combo.repo)
-  }
+  for_each   = { for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo if contains(keys(data.github_repository.existing_repos), combo.repo) }
   repository = each.value.repo
   branch     = each.value.branch
 }
-
 
 # Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
@@ -55,7 +48,7 @@ resource "github_branch_protection_v3" "branch_protection" {
 
   repository     = each.value.repo
   branch         = each.value.branch
-  enforce_admins = false # Excludes organisation admins
+  enforce_admins = false
 
   required_status_checks {
     strict   = true
@@ -65,7 +58,7 @@ resource "github_branch_protection_v3" "branch_protection" {
   required_pull_request_reviews {
     dismiss_stale_reviews           = true
     require_code_owner_reviews      = false
-    required_approving_review_count = 1 # Ensure at least 1 reviewer
+    required_approving_review_count = 1
   }
 
   restrictions {
