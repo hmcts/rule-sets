@@ -31,14 +31,14 @@ jobs:
       run: |
         git config --global user.name 'hmcts-platform-operations'
         git config --global user.email 'github-platform-operations@HMCTS.NET'
-        BRANCH_NAME="update-repo-list-$(date +%Y%m%d%H%M%S)"
-        git checkout -b $BRANCH_NAME
+        export BRANCH_NAME="update-repo-list-$(date +%Y%m%d%H%M%S)"
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        git checkout -b $BRANCH_NAME
 
     - name: Commit changes
       run: |
         git add production-repos.json
-        git commit -m 'Update repository list'
+        git commit -m 'Update repository list' || echo "No changes to commit"
       continue-on-error: true
 
     - name: Push changes
@@ -53,5 +53,6 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: 'Update repository list'
         branch: ${{ env.BRANCH_NAME }}
+        base: master
         title: 'Update repository list'
         body: 'Automated update of repository list.'
