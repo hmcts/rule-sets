@@ -1,6 +1,6 @@
 locals {
   # Read the repositories list from the JSON file
-  repositories_list = jsondecode(file("${path.module}/..prod-repos.json"))
+  repositories_list = jsondecode(file("${path.module}./prod-repos.json"))
 
   # Filter out excluded repositories
   included_repositories = [
