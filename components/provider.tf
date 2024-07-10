@@ -22,7 +22,7 @@ terraform {
   required_providers {
     github = {
       source  = "integrations/github"
-      version = "6.0.0"
+      version = "5.12.0"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
