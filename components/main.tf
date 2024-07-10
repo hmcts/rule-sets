@@ -51,7 +51,7 @@ resource "github_branch_protection_v3" "branch_protection" {
   enforce_admins = false # Excludes organisation admins
 
   required_status_checks {
-    strict = true
+    strict   = true
     contexts = ["ci/test", "ci/lint"]
   }
 
