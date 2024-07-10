@@ -26,39 +26,41 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-# Check if repositories exist
-data "github_repository" "existing_repos" {
-  for_each = { for repo in local.included_repositories : repo => repo }
-  name     = each.value
+
+locals {
+  existing_branches = {
+    for branch in data.github_branch.existing_branches :
+    "${branch.repository}:${branch.branch}" => branch
+    if branch.branch != null
+  }
+
+  branch_summary = {
+    for repo in local.included_repositories :
+    repo => {
+      main   = contains(keys(local.existing_branches), "${repo}:main")
+      master = contains(keys(local.existing_branches), "${repo}:master")
+    }
+  }
 }
 
-# Check if branches exist
-data "github_branch" "existing_branches" {
-  for_each   = { for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo if contains(keys(data.github_repository.existing_repos), combo.repo) }
-  repository = each.value.repo
-  branch     = each.value.branch
-}
-
-# Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
-  for_each = {
-    for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo
-    if try(data.github_branch.existing_branches["${combo.repo}:${combo.branch}"].branch, null) != null
-  }
+  for_each = local.existing_branches
 
-  repository     = each.value.repo
-  branch         = each.value.branch
-  enforce_admins = false # Excludes organisation admins
-
-  required_status_checks {
-    strict   = true
-    contexts = ["ci/test", "ci/lint"]
-  }
+  repository                      = each.value.repository
+  branch                          = each.value.branch
+  enforce_admins                  = false
+  require_signed_commits          = false
+  require_conversation_resolution = false
 
   required_pull_request_reviews {
     dismiss_stale_reviews           = true
     require_code_owner_reviews      = false
-    required_approving_review_count = 1 # Ensure at least 1 reviewer
+    required_approving_review_count = 1
+  }
+
+  required_status_checks {
+    contexts = ["ci/lint", "ci/test"]
+    strict   = true
   }
 
   restrictions {
@@ -66,5 +68,4 @@ resource "github_branch_protection_v3" "branch_protection" {
     teams = []
     apps  = []
   }
-
 }

@@ -63,17 +63,7 @@ variable "builtFrom" {
   default     = "https://github.com/hmcts/github-repository-rules"
 }
 
-# variable "repository_names" {
-#   type = map(string)
-#   default = {
-#     "fact-admin" = "main",
-#     "cnp-module-metric-alert" = "master",
-#     "cnp-keda-shared-infrastucture" = "master",
-#     "tax-tribunals-datacapture" = "main",
-#     "am-role-assignment-service" = "main",
-#     "ia-hearings-api" = "main",
-#     "em-ccd-orchestrator" = "main",
-#     "sscs-submit-your-appeal" = "main",
-#     "pcq-backend" = "main"
-#   }
-# }
+variable "batch_size" {
+  type    = number
+  default = 20
+}

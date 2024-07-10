@@ -1,23 +1,25 @@
 locals {
-  # Read the repositories list from the JSON file
-  repositories_list = jsondecode(file("${path.module}./prod-repos.json"))
+  included_repositories = jsondecode(data.local_file.repos_json.content)
+  branches_to_check     = ["main", "master"]
+  batch_size            = 20
 
-  # Filter out excluded repositories
-  included_repositories = [
-    for repo in local.repositories_list : repo
-    if !contains(var.excluded_repositories, repo)
-  ]
+  # Split repositories into batches of 20
+  repo_batches = chunklist(local.included_repositories, local.batch_size)
 
-  # Create a combination of repositories and branches
   repo_branch_combinations = flatten([
-    for repo in local.included_repositories : [
-      for branch in var.branches : {
-        repo   = repo
-        branch = branch
-      }
+    for batch in local.repo_batches : [
+      for repo in batch : [
+        for branch in local.branches_to_check : {
+          repo   = repo
+          branch = branch
+        }
+      ]
     ]
   ])
 }
+
+
+
 
 locals {
   env_display_names = {
