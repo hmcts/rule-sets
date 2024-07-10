@@ -17,11 +17,9 @@ This Terraform configuration automates the process of setting up branch protecti
 
 1. Clone this repository:
 git clone https://github.com/hmcts/github-repository-rules.git
-cd github-repository-rules
-Copy
 2. Create a `terraform.tfvars` file with your GitHub token:
-3. The python file runs as a cron job via GH Actions pipeline at midnight and updates the JSON file with new repositorys..
-3
+3. The python file runs as a cron job via GH Actions pipeline at midnight and updates the JSON file with new repositorys
+
 ## What This Does
 
 - Reads a list of repositories from `prod-repos.json`
