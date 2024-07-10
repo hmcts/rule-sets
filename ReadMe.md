@@ -10,7 +10,7 @@ This Terraform configuration automates the process of setting up branch protecti
 
 ### Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) (version 0.12 or later)
+- [Terraform](https://www.terraform.io/downloads.html) (version 1.5.7 or later)
 - GitHub Personal Access Token with appropriate permissions
 
 ### Configuration
@@ -20,21 +20,8 @@ git clone https://github.com/hmcts/github-repository-rules.git
 cd github-repository-rules
 Copy
 2. Create a `terraform.tfvars` file with your GitHub token:
-github_token = "your-github-token-here"
-Copy
-3. Update the `prod-repos.json` file with the list of repositories you want to manage.
-
-### Usage
-
-1. Initialize Terraform:
-terraform init
-Copy
-2. Plan the changes:
-terraform plan -parallelism=1
-Copy
-3. Apply the changes:
-terraform apply -parallelism=1
-Copy
+3. The python file runs as a cron job via GH Actions pipeline at midnight and updates the JSON file with new repositorys..
+3
 ## What This Does
 
 - Reads a list of repositories from `prod-repos.json`
@@ -44,19 +31,14 @@ Copy
 
 ## Maintenance
 
-To add or remove repositories, update the `prod-repos.json` file and re-run the Terraform apply command.
+To add or remove repositories follow the below:
 
-## Contributing
+1. Open a fresh PR from the master branch ensuring you have pulled down recent changes to the master branch.
+2. Update the `prod-repos.json` file with any repository you want. Ensure that its in the format of just the repo name eg: "github-repository-rules"
+3. Create a PR and allow the GH Actions pipeline to run a Terraform Plan to confirm changes are accepted.
+4. Once this first pipeline checks out, the second pipeline will apply your changes and update the branch protection rules.
+5. Once applied delete your branch.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/hmcts/github-repository-rules/tags).
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Recent Changes
 
@@ -74,12 +56,10 @@ These changes allow us to handle a significantly larger number of repositories w
 - `main.tf`: Contains the main Terraform configuration for branch protection rules.
 - `data.tf`: Defines data sources for GitHub repositories and branches.
 - `locals.tf`: Contains local variables for processing repository data.
-- `null_resources.tf`: Implements the batching system with delays.
 - `outputs.tf`: Defines outputs for branch summaries and counts.
 - `prod-repos.json`: List of repositories to manage.
 
 ## Troubleshooting
 
-If you encounter API rate limit issues, try increasing the delay between batches in the `null_resources.tf` file.
-
-For any other issues, please open an issue in the GitHub repository.
+Check your Terraform version and ensure there are no underlying bugs with the provider versions.
+Ensure you have formatted your repository name correctly as it may not pick it up properly.
