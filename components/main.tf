@@ -51,8 +51,8 @@ resource "github_branch_protection_v3" "branch_protection" {
   enforce_admins = false # Excludes organisation admins
 
   required_status_checks {
-    strict   = true
-    checks   = ["ci/test", "ci/lint"]
+    strict = true
+    checks = ["ci/test", "ci/lint"]
   }
 
   required_pull_request_reviews {
