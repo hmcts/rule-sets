@@ -52,7 +52,7 @@ resource "github_branch_protection_v3" "branch_protection" {
 
   required_status_checks {
     strict   = true
-    checks = ["ci/test", "ci/lint"]
+    checks   = ["ci/test", "ci/lint"]
   }
 
   required_pull_request_reviews {
