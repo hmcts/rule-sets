@@ -1,93 +1,93 @@
-name: Pull Request
+# name: Pull Request
 
-on:
-  pull_request:
-    branches:
-      - master
+# on:
+#   pull_request:
+#     branches:
+#       - master
 
-env:
-  TF_LOG: INFO
+# env:
+#   TF_LOG: INFO
 
-permissions:
-  id-token: write
-  issues: write
-  pull-requests: write
-  contents: read
+# permissions:
+#   id-token: write
+#   issues: write
+#   pull-requests: write
+#   contents: read
 
-jobs: 
-  pr-infra-check:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+# jobs: 
+#   pr-infra-check:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+#     - name: Setup Terraform
+#       uses: hashicorp/setup-terraform@v2
     
-    # Log into Azure with OIDC integration  
-    - name: 'Az CLI login'
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+#     # Log into Azure with OIDC integration  
+#     - name: 'Az CLI login'
+#       uses: azure/login@v1
+#       with:
+#         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#         subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
     
-    - name: Install jq
-      run: sudo apt-get install jq -y
+#     - name: Install jq
+#       run: sudo apt-get install jq -y
     
-    # List all the repos and branches that the rules are going to be applied on
-    - name: List Repositories and Branches
-      run: |
-          echo "Checking Repositories and Branches"
-          cat ./test-repos.json
-          for repo in $(jq -r '.[]' ./test-repos.json); do
-            echo "Checking repository: $repo"
-            curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-                 -H "Accept: application/vnd.github.v3+json" \
-                 https://api.github.com/repos/hmcts/$repo
+#     # List all the repos and branches that the rules are going to be applied on
+#     - name: List Repositories and Branches
+#       run: |
+#           echo "Checking Repositories and Branches"
+#           cat ./test-repos.json
+#           for repo in $(jq -r '.[]' ./test-repos.json); do
+#             echo "Checking repository: $repo"
+#             curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+#                  -H "Accept: application/vnd.github.v3+json" \
+#                  https://api.github.com/repos/hmcts/$repo
     
-            for branch in main master; do
-              echo "Checking branch: $branch in repository: $repo"
-              curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-                   -H "Accept: application/vnd.github.v3+json" \
-                   https://api.github.com/repos/hmcts/$repo/branches/$branch
-            done
-          done
+#             for branch in main master; do
+#               echo "Checking branch: $branch in repository: $repo"
+#               curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+#                    -H "Accept: application/vnd.github.v3+json" \
+#                    https://api.github.com/repos/hmcts/$repo/branches/$branch
+#             done
+#           done
 
-    - name: Terraform Init
-      working-directory: components
-      env:
-        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
-        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
+#     - name: Terraform Init
+#       working-directory: components
+#       env:
+#         STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+#         CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+#         RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+#         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+#         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+#         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+#         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+#       run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
 
-    - name: Terraform format
-      working-directory: components
-      id: fmt
-      run: terraform fmt -check
+#     - name: Terraform format
+#       working-directory: components
+#       id: fmt
+#       run: terraform fmt -check
 
-    - name: Terraform validate
-      working-directory: components
-      id: validate
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform validate
+#     - name: Terraform validate
+#       working-directory: components
+#       id: validate
+#       env:
+#         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+#         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+#         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+#         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+#       run: terraform validate
 
-    - name: Terraform plan
-      working-directory: components
-      id: plan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}"
+#     - name: Terraform plan
+#       working-directory: components
+#       id: plan
+#       env:
+#         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+#         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+#         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+#         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+#         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+#       run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}"
