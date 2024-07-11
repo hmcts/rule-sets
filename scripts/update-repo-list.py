@@ -52,8 +52,9 @@ for url in urls:
                         repo_name = clean_repo_name(match.group(1))
                         all_repos.append(repo_name)
 
-# Remove duplicates
+# Remove duplicates and ensure no erroneous "https" entries
 all_repos = list(set(all_repos))
+all_repos = [repo for repo in all_repos if repo != "https"]
 
 # Determine the path for the output file
 repo_file = os.path.join(os.path.dirname(__file__), '../production-repos.json')
