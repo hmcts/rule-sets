@@ -18,8 +18,24 @@ locals {
   ])
 }
 
+# Create a map of existing branches, then iterates over the github_branch data source results 
+locals {
+  existing_branches = {
+    for branch in data.github_branch.existing_branches :
+    "${branch.repository}:${branch.branch}" => branch
+    if branch.branch != null
+  }
 
+#Checks if a main/master branch exists on the repositorys
 
+  branch_summary = {
+    for repo in local.included_repositories :
+    repo => {
+      main   = contains(keys(local.existing_branches), "${repo}:main")
+      master = contains(keys(local.existing_branches), "${repo}:master")
+    }
+  }
+}
 
 locals {
   env_display_names = {

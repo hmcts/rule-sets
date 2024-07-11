@@ -1,31 +1,33 @@
 # GitHub Repository Rules
 
-This repository contains Terraform code to manage GitHub repository branch protection rules for HMCTS repositories.
+This repository contains code to manage GitHub repository branch protection rules for HMCTS.
 
 ## Overview
 
 This Terraform configuration automates the process of setting up branch protection rules across multiple GitHub repositories. It implements a batching system to handle a large number of repositories efficiently while respecting GitHub API rate limits.
+
+(https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
 ## Getting Started
 
 ### Prerequisites
 
 - [Terraform](https://www.terraform.io/downloads.html) (version 1.5.7 or later)
-- GitHub Personal Access Token with appropriate permissions
+- GitHub Personal Access Token with appropriate permissions.
 
 ### Configuration
 
 1. Clone this repository:
 git clone https://github.com/hmcts/github-repository-rules.git
 2. Create a `terraform.tfvars` file with your GitHub token:
-3. The python file runs as a cron job via GH Actions pipeline at midnight and updates the JSON file with new repositorys
+3. The python file runs as a cron job via GitHub Actions pipeline at midnight and updates the JSON file with new repositories.
 
 ## What This Does
 
 - Reads a list of repositories from `prod-repos.json`
-- Checks for the existence of 'main' and 'master' branches in each repository
-- Applies branch protection rules to existing branches
-- Processes repositories in batches to manage API rate limits
+- Checks for the existence of 'main' and 'master' branches in each repository.
+- Applies branch protection rules to existing branches.
+- Processes repositories in batches to manage API rate limits.
 
 ## Maintenance
 

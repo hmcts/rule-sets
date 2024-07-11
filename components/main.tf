@@ -26,23 +26,7 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-
-locals {
-  existing_branches = {
-    for branch in data.github_branch.existing_branches :
-    "${branch.repository}:${branch.branch}" => branch
-    if branch.branch != null
-  }
-
-  branch_summary = {
-    for repo in local.included_repositories :
-    repo => {
-      main   = contains(keys(local.existing_branches), "${repo}:main")
-      master = contains(keys(local.existing_branches), "${repo}:master")
-    }
-  }
-}
-
+# Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
   for_each = local.existing_branches
 

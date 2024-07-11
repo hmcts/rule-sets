@@ -6,15 +6,8 @@ output "common_tags" {
   }
 }
 
-# output "branch_summary" {
-#   value = {
-#     for repo, branches in local.branch_summary :
-#     repo => branches
-#     if branches.main && branches.master  # This will only show repos with both main and master
-#   }
-#   description = "Repositories that have both 'main' and 'master' branches"
-# }
 
+# This outout below will summarise how many repos have a master, main or both branches on the repos
 output "branch_count" {
   value = {
     total_repos       = length(local.included_repositories)
