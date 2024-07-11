@@ -56,7 +56,7 @@ for url in urls:
 all_repos = list(set(all_repos))
 
 # Determine the path for the output file
-repo_file = os.path.join(os.path.dirname(__file__), '../prod-repos.json')
+repo_file = os.path.join(os.path.dirname(__file__), '../production-repos.json')
 
 # Update the local file
 with open(repo_file, 'w') as f:
