@@ -6,7 +6,7 @@ This repository contains code to manage GitHub repository branch protection rule
 
 This Terraform configuration automates the process of setting up branch protection rules across multiple GitHub repositories. It implements a batching system to handle a large number of repositories efficiently while respecting GitHub API rate limits.
 
-https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28
+- [Rate Limits Page](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
 ## Getting Started
 

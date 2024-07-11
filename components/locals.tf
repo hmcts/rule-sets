@@ -26,7 +26,7 @@ locals {
     if branch.branch != null
   }
 
-#Checks if a main/master branch exists on the repositorys
+  #Checks if a main/master branch exists on the repositorys
 
   branch_summary = {
     for repo in local.included_repositories :
