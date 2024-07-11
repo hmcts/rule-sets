@@ -61,5 +61,5 @@ These changes allow us to handle a significantly larger number of repositories w
 
 ## Troubleshooting
 
-Check your Terraform version and ensure there are no underlying bugs with the provider versions.
-Ensure you have formatted your repository name correctly as it may not pick it up properly.
+- Check your Terraform version and ensure there are no underlying bugs with the provider versions.
+- Ensure you have formatted your repository name correctly as it may not pick it up properly.
