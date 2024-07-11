@@ -21,6 +21,14 @@ def fetch_and_parse(url):
         return json.loads(response.text)
     return None
 
+# Function to clean the repository name
+def clean_repo_name(repo_url):
+    # Remove .git suffix if present
+    repo_name = repo_url.replace('.git', '')
+    # Remove branch/reference suffixes (e.g., :branch, ?ref=branch)
+    repo_name = re.split(r'[:?]', repo_name)[0]
+    return repo_name.split('/')[-1]
+
 # Collect all repositories from the parsed files
 all_repos = []
 
@@ -32,17 +40,16 @@ for url in urls:
             if isinstance(data[key], list):
                 for item in data[key]:
                     if 'repo' in item:
-                        repo_name = item['repo'].split('/')[-1].replace('.git', '').split(':')[0]
+                        repo_name = clean_repo_name(item['repo'])
                         all_repos.append(repo_name)
     elif url.endswith('.json'):
         # For JSON files
         if 'module_calls' in data:
             for item in data['module_calls']:
                 if 'source' in item:
-                    # Extract the repository name from the 'source' value and remove the .git and any branch/ref suffix
                     match = re.search(r'git@github.com:(.*?)(\.git|$)', item['source'])
                     if match:
-                        repo_name = match.group(1).split('/')[-1].replace('.git', '').split(':')[0]
+                        repo_name = clean_repo_name(match.group(1))
                         all_repos.append(repo_name)
 
 # Remove duplicates
