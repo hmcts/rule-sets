@@ -1,8 +1,8 @@
 import requests
 import yaml
 import json
-import re
 import os
+from urllib.parse import urlparse, parse_qs
 
 # URLs to the remote YAML and JSON files
 urls = [
@@ -23,11 +23,14 @@ def fetch_and_parse(url):
 
 # Function to clean the repository name
 def clean_repo_name(repo_url):
-    # Remove .git suffix if present
-    repo_name = repo_url.replace('.git', '')
-    # Remove branch/reference suffixes (e.g., :branch, ?ref=branch)
-    repo_name = re.split(r'[:?]', repo_name)[0]
-    return repo_name.split('/')[-1]
+    parsed_url = urlparse(repo_url)
+    # Extract the path part of the URL and remove leading '/'
+    path = parsed_url.path.lstrip('/')
+    # Remove the .git suffix if present
+    repo_name = path.replace('.git', '')
+    # Split the path to get the repository name
+    repo_name = repo_name.split('/')[-1]
+    return repo_name
 
 # Collect all repositories from the parsed files
 all_repos = []
@@ -47,10 +50,8 @@ for url in urls:
         if 'module_calls' in data:
             for item in data['module_calls']:
                 if 'source' in item:
-                    match = re.search(r'git@github.com:(.*?)(\.git|$)', item['source'])
-                    if match:
-                        repo_name = clean_repo_name(match.group(1))
-                        all_repos.append(repo_name)
+                    repo_name = clean_repo_name(item['source'])
+                    all_repos.append(repo_name)
 
 # Remove duplicates and ensure no erroneous "https" entries
 all_repos = list(set(all_repos))
