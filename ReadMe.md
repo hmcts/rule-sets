@@ -46,8 +46,7 @@ We recently addressed issues with scaling to a larger number of repositories. He
 
 1. Implemented a batching system that splits repositories into smaller groups of 20.
 2. Processes each batch sequentially with built-in delays between batches.
-3. Uses null_resources to manage the batch processing and ensure proper timing.
-4. Only applies branch protection rules after all batches have been processed.
+3. Only applies branch protection rules after all batches have been processed.
 
 These changes allow us to handle a significantly larger number of repositories without overwhelming the GitHub API or causing Terraform to crash. The system is now more scalable for future growth.
 
