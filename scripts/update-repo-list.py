@@ -32,16 +32,18 @@ for url in urls:
             if isinstance(data[key], list):
                 for item in data[key]:
                     if 'repo' in item:
-                        all_repos.append(item['repo'])
+                        repo_name = item['repo'].split('/')[-1].replace('.git', '').split(':')[0]
+                        all_repos.append(repo_name)
     elif url.endswith('.json'):
         # For JSON files
         if 'module_calls' in data:
             for item in data['module_calls']:
                 if 'source' in item:
-                    # Extract the repository URL from the 'source' value
+                    # Extract the repository name from the 'source' value and remove the .git and any branch/ref suffix
                     match = re.search(r'git@github.com:(.*?)(\.git|$)', item['source'])
                     if match:
-                        all_repos.append(f'https://github.com/{match.group(1)}')
+                        repo_name = match.group(1).split('/')[-1].replace('.git', '').split(':')[0]
+                        all_repos.append(repo_name)
 
 # Remove duplicates
 all_repos = list(set(all_repos))
