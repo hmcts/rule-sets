@@ -305,6 +305,5 @@
   "sscs-bulk-scan",
   "em-icp-api",
   "ccd-case-activity-api",
-  "prl-citizen-frontend",
-  "sptribs-shared-infrastructure"
+  "prl-citizen-frontend"
 ]
