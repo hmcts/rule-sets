@@ -13,5 +13,5 @@ data "github_branch" "existing_branches" {
 }
 
 data "local_file" "repos_json" {
-  filename = "${path.module}/production-repos.json"
+  filename = "${path.module}./production-repos.json"
 }
