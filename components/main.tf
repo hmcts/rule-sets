@@ -32,6 +32,12 @@ resource "time_sleep" "wait_for_repo_data" {
   create_duration = "60s"
 }
 
+resource "time_sleep" "wait_for_branch_data" {
+  depends_on = [data.github_branch.existing_branches]
+
+  create_duration = "60s"
+}
+
 # Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
   for_each   = local.existing_branches
