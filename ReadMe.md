@@ -24,7 +24,7 @@ git clone https://github.com/hmcts/github-repository-rules.git
 
 ## What This Does
 
-- Reads a list of repositories from `prod-repos.json`
+- Reads a list of repositories from `production-repos.json`
 - Checks for the existence of 'main' and 'master' branches in each repository.
 - Applies branch protection rules to existing branches.
 - Processes repositories in batches to manage API rate limits.
@@ -34,7 +34,7 @@ git clone https://github.com/hmcts/github-repository-rules.git
 To add or remove repositories follow the below:
 
 1. Open a fresh PR from the master branch ensuring you have pulled down recent changes to the master branch.
-2. Update the `prod-repos.json` file with any repository you want. Ensure that its in the format of just the repo name eg: "github-repository-rules"
+2. Update the `production-repos.json` file with any repository you want. Ensure that its in the format of just the repo name eg: "github-repository-rules"
 3. Create a PR and allow the GH Actions pipeline to run a Terraform Plan to confirm changes are accepted.
 4. Once this first pipeline checks out, the second pipeline will apply your changes and update the branch protection rules.
 5. Once applied delete your branch.
@@ -56,7 +56,7 @@ These changes allow us to handle a significantly larger number of repositories w
 - `data.tf`: Defines data sources for GitHub repositories and branches.
 - `locals.tf`: Contains local variables for processing repository data.
 - `outputs.tf`: Defines outputs for branch summaries and counts.
-- `prod-repos.json`: List of repositories to manage.
+- `production-repos.json`: List of repositories to manage.
 
 ## Troubleshooting
 
