@@ -42,6 +42,8 @@ resource "github_branch_protection_v3" "branch_protection" {
     required_approving_review_count = 1
   }
 
+# ci/lint checks to ensure the code style and quality is of standard
+# ci/test will check to ensure the automated tests have passed
   required_status_checks {
     contexts = ["ci/lint", "ci/test"]
     strict   = true
