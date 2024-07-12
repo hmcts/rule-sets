@@ -4,10 +4,14 @@ data "github_repository" "repos" {
 }
 
 data "github_branch" "existing_branches" {
-  count = length(local.repo_branch_combinations)
+  for_each = {
+    for combo in local.repo_branch_combinations :
+    "${combo.repo}:${combo.branch}" => combo
+  }
+  depends_on = [time_sleep.wait_for_repo_data]
 
-  repository = local.repo_branch_combinations[count.index].repo
-  branch     = local.repo_branch_combinations[count.index].branch
+  repository = each.value.repo
+  branch     = each.value.branch
 }
 
 data "local_file" "repos_json" {
