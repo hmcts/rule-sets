@@ -26,22 +26,9 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-resource "time_sleep" "wait_for_repo_data" {
-  depends_on = [data.github_repository.repos]
-
-  create_duration = "60s"
-}
-
-resource "time_sleep" "wait_for_branch_data" {
-  depends_on = [data.github_branch.existing_branches]
-
-  create_duration = "60s"
-}
-
 # Apply branch protection rules only if the branch exists
 resource "github_branch_protection_v3" "branch_protection" {
-  for_each   = local.existing_branches
-  depends_on = [time_sleep.wait_for_branch_data]
+  for_each = local.existing_branches
 
   repository                      = each.value.repository
   branch                          = each.value.branch
@@ -65,4 +52,6 @@ resource "github_branch_protection_v3" "branch_protection" {
     teams = []
     apps  = []
   }
+
+  depends_on = [time_sleep.wait_for_rate_limit]
 }
