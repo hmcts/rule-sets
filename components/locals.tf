@@ -3,11 +3,11 @@ locals {
   included_repositories = jsondecode(data.local_file.repos_json.content)
   branches_to_check     = ["main", "master"]
   batch_size            = 20
-  
-# Split the repositories into batches of 20
+
+  # Split the repositories into batches of 20
   repo_batches = chunklist(local.included_repositories, local.batch_size)
 
-# Creates a combinations of repositories and branches to check.
+  # Creates a combinations of repositories and branches to check.
   repo_branch_combinations = flatten([
     for batch in local.repo_batches : [
       for repo in batch : [
@@ -27,7 +27,7 @@ locals {
   }
 
 
-# Create a summary of which branches exist for each repository.
+  # Create a summary of which branches exist for each repository.
   branch_summary = {
     for repo in local.included_repositories :
     repo => {
