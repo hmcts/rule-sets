@@ -3,7 +3,6 @@ locals {
   branches_to_check     = ["main", "master"]
   batch_size            = 20
 
-  # Split repositories into batches of 20
   repo_batches = chunklist(local.included_repositories, local.batch_size)
 
   repo_branch_combinations = flatten([
@@ -16,10 +15,7 @@ locals {
       ]
     ]
   ])
-}
 
-# Create a map of existing branches, then iterates over the github_branch data source results 
-locals {
   existing_branches = {
     for key, branch in data.github_branch.existing_branches :
     key => branch

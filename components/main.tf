@@ -53,5 +53,5 @@ resource "github_branch_protection_v3" "branch_protection" {
     apps  = []
   }
 
-  depends_on = [time_sleep.wait_for_rate_limit]
+  # depends_on = [time_sleep.wait_for_rate_limit]
 }
