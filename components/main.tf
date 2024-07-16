@@ -82,6 +82,5 @@ resource "github_repository" "test_repo" {
   allow_rebase_merge = true
 
   delete_branch_on_merge = true
-
-  # You can add more configuration options here as needed
+  
 }

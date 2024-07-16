@@ -93,13 +93,13 @@ jobs:
       run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}"
 
 
-    # - name: Terraform apply
-    #   working-directory: components
-    #   id: apply
-    #   env:
-    #     ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-    #     ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-    #     ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-    #     ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-    #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-    #   run: terraform apply -auto-approve -var="github_token=${{ secrets.PAT_TOKEN }}"
+    - name: Terraform apply
+      working-directory: components
+      id: apply
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: terraform apply -auto-approve -var="github_token=${{ secrets.PAT_TOKEN }}"
