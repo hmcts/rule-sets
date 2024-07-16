@@ -34,7 +34,7 @@ resource "github_organization_ruleset" "default_ruleset" {
   conditions {
     repository_name {
       include = local.included_repositories
-      exclude = []    # You can add exceptions here if needed
+      exclude = [] # You can add exceptions here if needed
     }
     ref_name {
       include = ["refs/heads/main", "refs/heads/master"]
@@ -43,16 +43,16 @@ resource "github_organization_ruleset" "default_ruleset" {
   }
 
   rules {
-    creation              = null
-    update                = null
-    deletion              = false
+    creation                = null
+    update                  = null
+    deletion                = false
     required_linear_history = true
 
     pull_request {
-      dismiss_stale_reviews_on_push = true
-      require_code_owner_review     = false
-      required_approving_review_count = 1
-      require_last_push_approval    = true
+      dismiss_stale_reviews_on_push     = true
+      require_code_owner_review         = false
+      required_approving_review_count   = 1
+      require_last_push_approval        = true
       required_review_thread_resolution = true
     }
 
