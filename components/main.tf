@@ -43,16 +43,16 @@ resource "github_organization_ruleset" "default_ruleset" {
   }
 
   rules {
-    creation                = null
-    update                  = null
-    deletion                = false
-    required_linear_history = true
+    creation                 = null
+    update                   = null
+    deletion                 = false
+    required_linear_history  = true
 
     pull_request {
-      dismiss_stale_reviews_on_push     = true
-      require_code_owner_review         = false
-      required_approving_review_count   = 1
-      require_last_push_approval        = true
+      dismiss_stale_reviews_on_push    = true
+      require_code_owner_review        = false
+      required_approving_review_count  = 1
+      require_last_push_approval       = true
       required_review_thread_resolution = true
     }
 

@@ -18,16 +18,17 @@ terraform {
     use_oidc             = true
     use_azuread_auth     = true
   }
-
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "6.2.1"
-    }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.109.0"
-    }
-  }
 }
+
+#   required_providers {
+#     github = {
+#       source  = "integrations/github"
+#       version = "6.2.1"
+#     }
+#     azurerm = {
+#       source  = "hashicorp/azurerm"
+#       version = "3.109.0"
+#     }
+#   }
+# }
 
