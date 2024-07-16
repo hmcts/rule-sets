@@ -1,11 +1,25 @@
 locals {
-  included_repositories = jsondecode(data.local_file.repos_json.content)
-  branches_to_check     = ["main", "master"]
-  batch_size            = 10
+  # List of repositories to exclude
+  excluded_repositories = [
+    "test-repo-uteppyig",
+    "test-repo-1ew34nh9",
+  ]
 
+  # Read repositories from JSON file
+  all_repositories = jsondecode(data.local_file.repos_json.content)
+
+  # Filter out excluded repositories
+  included_repositories = [
+    for repo in local.all_repositories : repo
+    if !contains(local.excluded_repositories, repo)
+  ]
+
+  branches_to_check = ["main", "master"]
+  batch_size        = 10
+  
   # Split repositories into batches of 10
   repo_batches = chunklist(local.included_repositories, local.batch_size)
-
+  
   repo_branch_combinations = flatten([
     for batch in local.repo_batches : [
       for repo in batch : [
@@ -23,9 +37,8 @@ locals {
   existing_branches = {
     for key, branch in data.github_branch.existing_branches :
     key => branch
-    # The data source will error if the branch doesn't exist, so we don't need to check for null
   }
-
+  
   # Checks if a main/master branch exists on the repositories
   branch_summary = {
     for repo in local.included_repositories :
