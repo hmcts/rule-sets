@@ -26,15 +26,16 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-resource "github_repository_ruleset" "default_ruleset" {
-  for_each = toset(local.included_repositories)
-
+resource "github_organization_ruleset" "default_ruleset" {
   name        = "Default Branch Protection"
-  repository  = each.key
   target      = "branch"
   enforcement = "active"
 
   conditions {
+    repository_name {
+      include = local.included_repositories
+      exclude = []
+    }
     ref_name {
       include = ["refs/heads/main", "refs/heads/master"]
       exclude = []
@@ -42,16 +43,16 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   rules {
-    creation                = null
-    update                  = null
-    deletion                = false
-    required_linear_history = true
+    creation                 = null
+    update                   = null
+    deletion                 = false
+    required_linear_history  = true
 
     pull_request {
-      dismiss_stale_reviews_on_push     = true
-      require_code_owner_review         = false
-      required_approving_review_count   = 1
-      require_last_push_approval        = true
+      dismiss_stale_reviews_on_push    = true
+      require_code_owner_review        = false
+      required_approving_review_count  = 1
+      require_last_push_approval       = true
       required_review_thread_resolution = true
     }
 
