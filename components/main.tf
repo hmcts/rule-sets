@@ -90,5 +90,5 @@ resource "github_repository" "test_repo" {
   allow_rebase_merge = true
 
   delete_branch_on_merge = true
-  
+
 }
