@@ -26,30 +26,44 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-# Apply branch protection rules only if the branch exists
-resource "github_branch_protection_v3" "branch_protection" {
-  for_each = local.existing_branches
+resource "github_organization_ruleset" "default_ruleset" {
+  name        = "Default Branch Protection"
+  target      = "branch"
+  enforcement = "active"
 
-  repository                      = each.value.repository
-  branch                          = each.value.branch
-  enforce_admins                  = false
-  require_signed_commits          = false
-  require_conversation_resolution = false
-
-  required_pull_request_reviews {
-    dismiss_stale_reviews           = true
-    require_code_owner_reviews      = false
-    required_approving_review_count = 1
+  conditions {
+    repository_name {
+      include = local.included_repositories
+      exclude = []    # You can add exceptions here if needed
+    }
+    ref_name {
+      include = ["refs/heads/main", "refs/heads/master"]
+      exclude = []
+    }
   }
 
-  required_status_checks {
-    contexts = ["ci/lint", "ci/test"]
-    strict   = true
-  }
+  rules {
+    creation              = null
+    update                = null
+    deletion              = false
+    required_linear_history = true
 
-  restrictions {
-    users = []
-    teams = []
-    apps  = []
+    pull_request {
+      dismiss_stale_reviews_on_push = true
+      require_code_owner_review     = false
+      required_approving_review_count = 1
+      require_last_push_approval    = true
+      required_review_thread_resolution = true
+    }
+
+    required_status_checks {
+      strict_required_status_checks_policy = true
+      required_check {
+        context = "ci/lint"
+      }
+      required_check {
+        context = "ci/test"
+      }
+    }
   }
 }
