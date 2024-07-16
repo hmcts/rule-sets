@@ -66,3 +66,22 @@ resource "github_repository_ruleset" "default_ruleset" {
     }
   }
 }
+
+# Create 10 GitHub repositories
+resource "github_repository" "test_repo" {
+  count = 10
+
+  name        = "test-repo-${count.index + 1}"
+  description = "Test repository ${count.index + 1} for code testing"
+
+  visibility = "private"
+  auto_init  = true
+
+  allow_merge_commit = true
+  allow_squash_merge = true
+  allow_rebase_merge = true
+
+  delete_branch_on_merge = true
+
+  # You can add more configuration options here as needed
+}
