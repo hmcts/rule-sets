@@ -1,15 +1,13 @@
 locals {
-  # List of repositories to exclude
+  # List of repositories to exclude from the production-repos.json file
   excluded_repositories = [
     "test-repo-uteppyig",
-    "test-repo-1ew34nh9",
-    # Add more repositories to exclude as needed
   ]
 
   # Read repositories from JSON file
   all_repositories = jsondecode(data.local_file.repos_json.content)
 
-  # Filter out excluded repositories
+  # Filter out excluded repos
   included_repositories = [
     for repo in local.all_repositories : repo
     if !contains(local.excluded_repositories, repo)
@@ -18,7 +16,7 @@ locals {
   branches_to_check = ["main", "master"]
   batch_size        = 10
 
-  # Split repositories into batches of 10
+  # Split repositories into batches of 10 to help handle the API Rate limits
   repo_batches = chunklist(local.included_repositories, local.batch_size)
 
   repo_branch_combinations = flatten([
