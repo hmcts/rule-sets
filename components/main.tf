@@ -29,7 +29,7 @@ resource "azurerm_storage_container" "tfstate" {
 resource "github_repository_ruleset" "default_ruleset" {
   for_each = toset(local.included_repositories)
 
-  name        = "Default Branch Protection"
+  name        = "Branch Protection Rule Sets"
   repository  = each.key
   target      = "branch"
   enforcement = "active"

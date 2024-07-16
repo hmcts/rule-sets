@@ -10,6 +10,25 @@ locals {
     }
   }
 }
+
+locals {
+  # List of repositories to exclude
+  excluded_repositories = [
+    "test-repo-uteppyig",
+    "test-repo-1ew34nh9",
+  ]
+
+  # Read repositories from JSON file
+  all_repositories = jsondecode(file("./production-repos.json"))
+
+  # Filter out excluded repositories
+  included_repositories = [
+    for repo in local.all_repositories : repo
+    if !contains(local.excluded_repositories, repo)
+  ]
+}
+
+
 locals {
   env_display_names = {
     sbox    = "Sandbox"
