@@ -23,7 +23,7 @@ locals {
   existing_branches = {
     for key, branch in data.github_branch.existing_branches :
     key => branch
-    if branch.name != null
+    # The data source will error if the branch doesn't exist, so we don't need to check for null
   }
 
   # Checks if a main/master branch exists on the repositories

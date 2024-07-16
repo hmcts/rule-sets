@@ -22,3 +22,11 @@ output "branch_count" {
 output "repo_names" {
   value = github_repository.test_repo[*].name
 }
+
+output "existing_branches" {
+  value = keys(local.existing_branches)
+}
+
+output "branch_summary" {
+  value = local.branch_summary
+}

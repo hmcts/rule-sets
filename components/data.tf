@@ -6,6 +6,7 @@ data "local_file" "repos_json" {
   filename = "${path.module}./production-repos.json"
 }
 
+# Fetch existing branches for each repository
 data "github_branch" "existing_branches" {
   for_each = {
     for combo in local.repo_branch_combinations : "${combo.repo}:${combo.branch}" => combo
