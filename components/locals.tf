@@ -1,8 +1,9 @@
 locals {
-  # List of repositories to exclude from the production-repos.json file, add them below to exlcude
+  # List of repositories to exclude
   excluded_repositories = [
     "test-repo-uteppyig",
     "test-repo-1ew34nh9",
+    # Add more repositories to exclude as needed
   ]
 
   # Read repositories from JSON file
@@ -17,7 +18,7 @@ locals {
   branches_to_check = ["main", "master"]
   batch_size        = 10
 
-  # Split repositories into batches of 10 for helping with the GH API rate limits
+  # Split repositories into batches of 10
   repo_batches = chunklist(local.included_repositories, local.batch_size)
 
   repo_branch_combinations = flatten([

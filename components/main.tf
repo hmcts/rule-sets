@@ -26,8 +26,9 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
+# Create rulesets for repositories with existing branches
 resource "github_repository_ruleset" "default_ruleset" {
-  for_each = toset(local.included_repositories)
+  for_each = { for repo, summary in local.branch_summary : repo => summary if summary.main || summary.master }
 
   name        = "Branch Protection Rule Sets"
   repository  = each.key
@@ -36,7 +37,10 @@ resource "github_repository_ruleset" "default_ruleset" {
 
   conditions {
     ref_name {
-      include = ["refs/heads/main", "refs/heads/master"]
+      include = concat(
+        each.value.main ? ["refs/heads/main"] : [],
+        each.value.master ? ["refs/heads/master"] : []
+      )
       exclude = []
     }
   }
@@ -46,7 +50,6 @@ resource "github_repository_ruleset" "default_ruleset" {
     update                  = null
     deletion                = false
     required_linear_history = true
-
     pull_request {
       dismiss_stale_reviews_on_push     = true
       require_code_owner_review         = false
@@ -54,7 +57,6 @@ resource "github_repository_ruleset" "default_ruleset" {
       require_last_push_approval        = true
       required_review_thread_resolution = true
     }
-
     required_status_checks {
       strict_required_status_checks_policy = true
       required_check {
