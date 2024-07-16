@@ -18,7 +18,7 @@ output "branch_count" {
   description = "Summary of branch counts"
 }
 
-# Output the clone URLs for each repository
-output "repo_clone_urls" {
-  value = github_repository.test_repo[*].http_clone_url
+# Output the clone URLs for each repository# Output just the repository names
+output "repo_names" {
+  value = github_repository.test_repo[*].name
 }
