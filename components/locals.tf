@@ -1,6 +1,20 @@
 locals {
-  included_repositories = jsondecode(data.local_file.repos_json.content)
-  branches_to_check     = ["main", "master"]
+  # List of repositories to exclude from having the rule sets applied to
+  excluded_repositories = [
+    "test-repo-uteppyig",
+    "test-repo-1ew34nh9",
+  ]
+
+  # Read repositories from production-repos.json file 
+  all_repositories = jsondecode(file("./production-repos.json"))
+
+  # Filter out excluded repositories
+  included_repositories = [
+    for repo in local.all_repositories : repo
+    if !contains(local.excluded_repositories, repo)
+  ]
+
+  branches_to_check = ["main", "master"]
 
   branch_summary = {
     for repo in local.included_repositories :
@@ -10,24 +24,6 @@ locals {
     }
   }
 }
-
-locals {
-  # List of repositories to exclude
-  excluded_repositories = [
-    "test-repo-uteppyig",
-    "test-repo-1ew34nh9",
-  ]
-
-  # Read repositories from JSON file
-  all_repositories = jsondecode(file("./production-repos.json"))
-
-  # Filter out excluded repositories
-  included_repositories = [
-    for repo in local.all_repositories : repo
-    if !contains(local.excluded_repositories, repo)
-  ]
-}
-
 
 locals {
   env_display_names = {
