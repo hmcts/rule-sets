@@ -1,26 +1,37 @@
 locals {
-  # List of repositories to exclude from having the rule sets applied to
-  excluded_repositories = [
-    "test-repo-uteppyig",
-    "test-repo-1ew34nh9",
-  ]
+  included_repositories = jsondecode(data.local_file.repos_json.content)
+  branches_to_check     = ["main", "master"]
+  batch_size            = 10 # Changed to 10
 
-  # Read repositories from production-repos.json file 
-  all_repositories = jsondecode(file("../production-repos.json"))
+  # Split repositories into batches of 10
+  repo_batches = chunklist(local.included_repositories, local.batch_size)
 
-  # Filter out excluded repositories
-  included_repositories = [
-    for repo in local.all_repositories : repo
-    if !contains(local.excluded_repositories, repo)
-  ]
+  repo_branch_combinations = flatten([
+    for batch in local.repo_batches : [
+      for repo in batch : [
+        for branch in local.branches_to_check : {
+          repo   = repo
+          branch = branch
+        }
+      ]
+    ]
+  ])
+}
 
-  branches_to_check = ["main", "master"]
+# Create a map of existing branches, then iterates over the github_branch data source results 
+locals {
+  existing_branches = {
+    for branch in data.github_branch.existing_branches :
+    "${branch.repository}:${branch.branch}" => branch
+    if branch.branch != null
+  }
 
+  # Checks if a main/master branch exists on the repositories
   branch_summary = {
     for repo in local.included_repositories :
     repo => {
-      main   = contains(local.branches_to_check, "main")
-      master = contains(local.branches_to_check, "master")
+      main   = contains(keys(local.existing_branches), "${repo}:main")
+      master = contains(keys(local.existing_branches), "${repo}:master")
     }
   }
 }
