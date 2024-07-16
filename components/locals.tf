@@ -6,7 +6,7 @@ locals {
   ]
 
   # Read repositories from production-repos.json file 
-  all_repositories = jsondecode(file("./production-repos.json"))
+  all_repositories = jsondecode(file("../production-repos.json"))
 
   # Filter out excluded repositories
   included_repositories = [
