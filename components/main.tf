@@ -79,7 +79,7 @@ resource "random_string" "repo_suffix" {
 resource "github_repository" "test_repo" {
   count = 10
 
-  name        = "test-repo-${count.index + 1}"
+  name        = "test-repo-${random_string.repo_suffix[count.index].result}"
   description = "Test repository ${count.index + 1} for code testing"
 
   visibility = "private"
@@ -90,5 +90,5 @@ resource "github_repository" "test_repo" {
   allow_rebase_merge = true
 
   delete_branch_on_merge = true
-
+  
 }
