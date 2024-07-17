@@ -94,3 +94,4 @@ resource "github_repository" "test_repo" {
   delete_branch_on_merge = true
 
 }
+
