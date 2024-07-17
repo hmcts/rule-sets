@@ -90,7 +90,7 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform plan -var="github_token=${{ secrets.OAUTH_TOKEN }}"
+      run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
 
 
     - name: Terraform apply
@@ -102,5 +102,4 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform apply -auto-approve -var="github_token=${{ secrets.OAUTH_TOKEN }}"
-      
+      run: terraform apply -auto-approve -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
