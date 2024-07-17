@@ -34,7 +34,7 @@ resource "github_repository_ruleset" "default_ruleset" {
   target      = "branch"
   enforcement = "active"
 
-  repository = each.value
+  repository = "test-repo-0oobilw3"
 
   conditions {
     ref_name {
@@ -44,8 +44,8 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   rules {
-    creation                = null
-    update                  = null
+    creation                = false
+    update                  = false
     deletion                = false
     required_linear_history = true
 
