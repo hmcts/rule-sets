@@ -1,4 +1,4 @@
-name: Bypass Branch Protection
+name: Bypass Rule Sets Branch Protection
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
 
     - name: Run bypass script
       env:
-        GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_OAUTH_TOKEN }}
+        GITHUB_OAUTH_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: |
         source venv/bin/activate
         python auto_bypass_branch_protection.py
