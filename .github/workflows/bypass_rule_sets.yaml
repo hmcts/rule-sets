@@ -1,7 +1,7 @@
 name: Bypass Branch Protection
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows the workflow to be manually triggered
 
 jobs:
   add-bypass-rules:
