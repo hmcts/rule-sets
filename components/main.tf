@@ -44,6 +44,12 @@ resource "github_repository_ruleset" "default_ruleset" {
     }
   }
 
+  bypass_actors {
+    actor_id    = data.github_organization.org.orgname
+    actor_type  = "OrganizationAdmin"
+    bypass_mode = "always"
+  }
+
   rules {
     creation                = null
     update                  = null
@@ -69,4 +75,3 @@ resource "github_repository_ruleset" "default_ruleset" {
     }
   }
 }
-
