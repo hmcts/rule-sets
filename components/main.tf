@@ -28,35 +28,36 @@ resource "azurerm_storage_container" "tfstate" {
 
 # Create rulesets for repositories with existing branches
 resource "github_repository_ruleset" "default_ruleset" {
-  for_each = { for repo, summary in local.branch_summary : repo => summary if summary.main || summary.master }
+  for_each = {
+    for repo in local.included_repositories : repo => data.github_repository_rulesets.existing[repo].rulesets
+  }
 
-  name        = "Branch Protection Rule Sets"
-  repository  = each.key
-  target      = "branch"
+  repository = each.key
+  name       = "Default Branch Protection"
+  target     = "branch"
   enforcement = "active"
 
   conditions {
     ref_name {
-      include = concat(
-        each.value.main ? ["refs/heads/main"] : [],
-        each.value.master ? ["refs/heads/master"] : []
-      )
+      include = ["refs/heads/main", "refs/heads/master"]
       exclude = []
     }
   }
 
   rules {
-    creation                = null
-    update                  = null
-    deletion                = false
+    creation              = null
+    update                = null
+    deletion              = false
     required_linear_history = true
+
     pull_request {
-      dismiss_stale_reviews_on_push     = true
-      require_code_owner_review         = false
-      required_approving_review_count   = 1
-      require_last_push_approval        = true
+      dismiss_stale_reviews_on_push    = true
+      require_code_owner_review        = false
+      required_approving_review_count  = 1
+      require_last_push_approval       = true
       required_review_thread_resolution = true
     }
+
     required_status_checks {
       strict_required_status_checks_policy = true
       required_check {
@@ -69,28 +70,29 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 }
 
+
 # Create a random string for each repository
-# resource "random_string" "repo_suffix" {
-#   count   = 10
-#   length  = 8
-#   special = false
-#   upper   = false
-# }
+resource "random_string" "repo_suffix" {
+  count   = 10
+  length  = 8
+  special = false
+  upper   = false
+}
 
-# # Create 10 GitHub repositories
-# resource "github_repository" "test_repo" {
-#   count = 10
+# Create 10 GitHub repositories
+resource "github_repository" "test_repo" {
+  count = 10
 
-#   name        = "test-repo-${random_string.repo_suffix[count.index].result}"
-#   description = "Test repository ${count.index + 1} for code testing"
+  name        = "test-repo-${random_string.repo_suffix[count.index].result}"
+  description = "Test repository ${count.index + 1} for code testing"
 
-#   visibility = "private"
-#   auto_init  = true
+  visibility = "private"
+  auto_init  = true
 
-#   allow_merge_commit = true
-#   allow_squash_merge = true
-#   allow_rebase_merge = true
+  allow_merge_commit = true
+  allow_squash_merge = true
+  allow_rebase_merge = true
 
-#   delete_branch_on_merge = true
+  delete_branch_on_merge = true
 
-# }
+}
