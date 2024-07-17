@@ -18,11 +18,6 @@ output "branch_count" {
   description = "Summary of branch counts"
 }
 
-# Output the clone URLs for each repository# Output just the repository names
-output "repo_names" {
-  value = github_repository.test_repo[*].name
-}
-
 output "existing_branches" {
   value = keys(local.existing_branches)
 }
