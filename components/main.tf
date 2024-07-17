@@ -33,7 +33,7 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   repository  = each.key
-  name        = "Default Branch Protection"
+  name        = "Branch Protection Rule Sets"
   target      = "branch"
   enforcement = "active"
 
@@ -69,3 +69,4 @@ resource "github_repository_ruleset" "default_ruleset" {
     }
   }
 }
+
