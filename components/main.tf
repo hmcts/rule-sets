@@ -32,9 +32,9 @@ resource "github_repository_ruleset" "default_ruleset" {
     for repo in local.included_repositories : repo => data.github_repository_rulesets.existing[repo].rulesets
   }
 
-  repository = each.key
-  name       = "Default Branch Protection"
-  target     = "branch"
+  repository  = each.key
+  name        = "Default Branch Protection"
+  target      = "branch"
   enforcement = "active"
 
   conditions {
@@ -45,16 +45,16 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   rules {
-    creation              = null
-    update                = null
-    deletion              = false
+    creation                = null
+    update                  = null
+    deletion                = false
     required_linear_history = true
 
     pull_request {
-      dismiss_stale_reviews_on_push    = true
-      require_code_owner_review        = false
-      required_approving_review_count  = 1
-      require_last_push_approval       = true
+      dismiss_stale_reviews_on_push     = true
+      require_code_owner_review         = false
+      required_approving_review_count   = 1
+      require_last_push_approval        = true
       required_review_thread_resolution = true
     }
 

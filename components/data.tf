@@ -17,6 +17,6 @@ data "github_branch" "existing_branches" {
 }
 
 data "github_repository_rulesets" "existing" {
-  for_each = toset(local.included_repositories)
+  for_each   = toset(local.included_repositories)
   repository = each.value
 }
