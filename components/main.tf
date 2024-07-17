@@ -70,27 +70,27 @@ resource "github_repository_ruleset" "default_ruleset" {
 }
 
 # Create a random string for each repository
-resource "random_string" "repo_suffix" {
-  count   = 10
-  length  = 8
-  special = false
-  upper   = false
-}
+# resource "random_string" "repo_suffix" {
+#   count   = 10
+#   length  = 8
+#   special = false
+#   upper   = false
+# }
 
-# Create 10 GitHub repositories
-resource "github_repository" "test_repo" {
-  count = 10
+# # Create 10 GitHub repositories
+# resource "github_repository" "test_repo" {
+#   count = 10
 
-  name        = "test-repo-${random_string.repo_suffix[count.index].result}"
-  description = "Test repository ${count.index + 1} for code testing"
+#   name        = "test-repo-${random_string.repo_suffix[count.index].result}"
+#   description = "Test repository ${count.index + 1} for code testing"
 
-  visibility = "private"
-  auto_init  = true
+#   visibility = "private"
+#   auto_init  = true
 
-  allow_merge_commit = true
-  allow_squash_merge = true
-  allow_rebase_merge = true
+#   allow_merge_commit = true
+#   allow_squash_merge = true
+#   allow_rebase_merge = true
 
-  delete_branch_on_merge = true
+#   delete_branch_on_merge = true
 
-}
+# }
