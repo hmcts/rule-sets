@@ -27,9 +27,9 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 resource "github_repository_ruleset" "default_ruleset" {
-  for_each = local.repository_map
+  for_each = local.repository_set
 
-  repository  = each.value.name
+  repository  = each.value
   name        = "Branch Protection Rule Sets"
   target      = "branch"
   enforcement = "active"
@@ -42,7 +42,7 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   bypass_actors {
-    actor_id    = data.github_organization.org.name
+    actor_id    = data.github_organization.org.id
     actor_type  = "OrganizationAdmin"
     bypass_mode = "always"
   }

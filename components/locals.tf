@@ -37,6 +37,9 @@ locals {
     }
   }
 
+  # Create a set of repositories
+  repository_set = toset(local.included_repositories)
+
   # Create a map of existing branches
   existing_branches = {
     for key, branch in data.github_branch.existing_branches :
