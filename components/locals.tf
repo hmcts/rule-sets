@@ -30,7 +30,7 @@ locals {
     ]
   ])
 
-   # Create a map of repositories
+  # Create a map of repositories
   repository_map = {
     for repo in local.included_repositories : repo => {
       name = repo
