@@ -30,6 +30,13 @@ locals {
     ]
   ])
 
+   # Create a map of repositories
+  repository_map = {
+    for repo in local.included_repositories : repo => {
+      name = repo
+    }
+  }
+
   # Create a map of existing branches
   existing_branches = {
     for key, branch in data.github_branch.existing_branches :
