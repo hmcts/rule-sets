@@ -1,13 +1,10 @@
 locals {
-  # List of repositories to exclude from the production-repos.json file
   excluded_repositories = [
     "test-repo-uteppyig",
   ]
 
-  # Read repositories from JSON file
   all_repositories = jsondecode(data.local_file.repos_json.content)
 
-  # Filter out excluded repos
   included_repositories = [
     for repo in local.all_repositories : repo
     if !contains(local.excluded_repositories, repo)
@@ -16,7 +13,6 @@ locals {
   branches_to_check = ["main", "master"]
   batch_size        = 10
 
-  # Split repositories into batches of 10 to help handle the API Rate limits
   repo_batches = chunklist(local.included_repositories, local.batch_size)
 
   repo_branch_combinations = flatten([
@@ -30,23 +26,11 @@ locals {
     ]
   ])
 
-  # Create a map of repositories
-  repository_map = {
-    for repo in local.included_repositories : repo => {
-      name = repo
-    }
-  }
-
-  # Create a set of repositories
-  repository_set = toset(local.included_repositories)
-
-  # Create a map of existing branches
   existing_branches = {
     for key, branch in data.github_branch.existing_branches :
     key => branch
   }
 
-  # Checks if a main/master branch exists on the repositories
   branch_summary = {
     for repo in local.included_repositories :
     repo => {
@@ -54,6 +38,8 @@ locals {
       master = contains(keys(local.existing_branches), "${repo}:master")
     }
   }
+
+  repository_set = toset(local.included_repositories)
 }
 
 
