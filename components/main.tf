@@ -28,13 +28,12 @@ resource "azurerm_storage_container" "tfstate" {
 
 # Create rulesets for repositories with existing branches
 resource "github_repository_ruleset" "default_ruleset" {
-  for_each = local.repository_set
+  for_each = toset(local.included_repositories)
 
-  name        = "Default Branch Protection"
+  repository  = each.key
+  name        = "Branch Protection Rule Sets"
   target      = "branch"
   enforcement = "active"
-
-  repository = "test-repo-0oobilw3"
 
   conditions {
     ref_name {
@@ -43,9 +42,15 @@ resource "github_repository_ruleset" "default_ruleset" {
     }
   }
 
+  bypass_actors {
+    actor_id    = data.github_organization.org.orgname
+    actor_type  = "OrganizationAdmin"
+    bypass_mode = "always"
+  }
+
   rules {
-    creation                = false
-    update                  = false
+    creation                = null
+    update                  = null
     deletion                = false
     required_linear_history = true
 
@@ -66,11 +71,5 @@ resource "github_repository_ruleset" "default_ruleset" {
         context = "ci/test"
       }
     }
-  }
-
-  bypass_actors {
-    actor_type  = "OrganizationAdmin"
-    actor_id    = data.github_organization.org.node_id
-    bypass_mode = "always"
   }
 }
