@@ -29,7 +29,7 @@ resource "azurerm_storage_container" "tfstate" {
 # Create rulesets for repositories with existing branches
 resource "github_repository_ruleset" "default_ruleset" {
   for_each = {
-    for repo in local.included_repositories : repo => data.github_repository_rulesets.existing[repo].rulesets
+    for repo in local.included_repositories : repo => repo
   }
 
   repository  = each.key
