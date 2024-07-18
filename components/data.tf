@@ -14,6 +14,6 @@ data "github_branch" "existing_branches" {
   branch     = each.value.branch
 }
 
-# data "github_user" "current" {
-#   username = "ConnorOKane-Kainos"
-# }
+data "github_user" "current" {
+  username = "ConnorOKane-Kainos"
+}
