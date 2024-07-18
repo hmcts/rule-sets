@@ -68,7 +68,7 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   bypass_actors {
-    actor_id    = data.github_user.current.id
+    actor_id    = "4067333"
     actor_type  = "OrganizationAdmin"
     bypass_mode = "always"
   }
