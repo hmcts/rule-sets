@@ -3,7 +3,7 @@ data "github_organization" "org" {
 }
 
 data "local_file" "repos_json" {
-  filename = "${path.module}/production-repos.json"
+  filename = "${path.module}./production-repos.json"
 }
 
 data "github_branch" "existing_branches" {
