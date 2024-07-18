@@ -27,7 +27,6 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 # Create rulesets for repositories with existing branches
-# Create rulesets for repositories
 resource "github_repository_ruleset" "default_ruleset" {
   for_each = toset(local.included_repositories)
 
@@ -42,6 +41,12 @@ resource "github_repository_ruleset" "default_ruleset" {
       exclude = []
     }
   }
+
+  # bypass_actors {
+  #   actor_id = "1"
+  #   bypass_mode = "always"
+  #   actor_type = "OrganizationAdmin"
+  # }
 
   rules {
     creation                = null

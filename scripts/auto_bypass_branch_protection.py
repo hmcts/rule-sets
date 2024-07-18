@@ -67,57 +67,35 @@ def get_repo_rulesets(repo):
     print(f"Error fetching rulesets for {repo}. Status code: {response.status_code}")
     return []
 
-def bypass_branch_protection(repo, rulesets, admins):
-    for ruleset in rulesets:
-        if ruleset.get('target') == 'branch':
-            print(f"Attempting to update ruleset {ruleset['name']} (ID: {ruleset['id']}) for {repo}")
+def disable_bypass_actors(repo, ruleset):
+    # Remove bypass actors
+    update_data = {
+        'name': ruleset['name'],
+        'target': ruleset['target'],
+        'enforcement': ruleset['enforcement'],
+        'bypass_actors': []
+    }
 
-            # Prepare bypass actors with valid actor type and ID
-            bypass_actors = [
-                {
-                    'actor_id': 1,  # ID for OrganizationAdmin
-                    'actor_type': 'OrganizationAdmin',
-                    'bypass_mode': 'always'
-                }
-            ]
+    # Add conditions if present
+    if 'conditions' in ruleset:
+        update_data['conditions'] = ruleset['conditions']
 
-            # Prepare the full ruleset update payload
-            update_data = {
-                'name': ruleset['name'],
-                'target': ruleset['target'],
-                'enforcement': ruleset['enforcement'],
-                'bypass_actors': bypass_actors
-            }
+    # Add rules if present
+    if 'rules' in ruleset:
+        update_data['rules'] = ruleset['rules']
 
-            # Add conditions if present
-            if 'conditions' in ruleset:
-                update_data['conditions'] = ruleset['conditions']
+    # Update the ruleset
+    response = requests.put(
+        f'{API_BASE_URL}/repos/{ORGANIZATION}/{repo}/rulesets/{ruleset["id"]}',
+        headers=headers,
+        json=update_data
+    )
 
-            # Add rules if present
-            if 'rules' in ruleset:
-                update_data['rules'] = ruleset['rules']
-
-            # Update the ruleset
-            response = requests.put(
-                f'{API_BASE_URL}/repos/{ORGANIZATION}/{repo}/rulesets/{ruleset["id"]}',
-                headers=headers,
-                json=update_data
-            )
-
-            if response.status_code == 200:
-                print(f"Successfully updated bypass permissions for ruleset {ruleset['name']} in {repo}")
-            else:
-                print(f"Error: Failed to update ruleset {ruleset['name']} for {repo}. Status code: {response.status_code}")
-                print(f"Response: {response.text}")
-                
-            # Check the updated ruleset
-            check_response = requests.get(
-                f'{API_BASE_URL}/repos/{ORGANIZATION}/{repo}/rulesets/{ruleset["id"]}',
-                headers=headers
-            )
-            print(f"Ruleset check response: {check_response.status_code} - {check_response.text}")
-
-        time.sleep(1)  # Add a small delay to avoid hitting rate limits
+    if response.status_code == 200:
+        print(f"Successfully removed bypass actors for ruleset {ruleset['name']} in {repo}")
+    else:
+        print(f"Error: Failed to remove bypass actors for ruleset {ruleset['name']} in {repo}. Status code: {response.status_code}")
+        print(f"Response: {response.text}")
 
 def main():
     admins = get_org_admins()
@@ -127,7 +105,10 @@ def main():
     print(f"Found {len(repos_with_rulesets)} repositories with rulesets.")
     
     for repo, rulesets in repos_with_rulesets:
-        bypass_branch_protection(repo, rulesets, admins)
+        for ruleset in rulesets:
+            if ruleset.get('target') == 'branch':
+                disable_bypass_actors(repo, ruleset)
+                time.sleep(1)  # Add a small delay to avoid hitting rate limits
 
 if __name__ == "__main__":
     main()

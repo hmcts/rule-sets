@@ -30,4 +30,4 @@ jobs:
         GITHUB_OAUTH_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: |
         source venv/bin/activate
-        python auto_bypass_branch_protection.py
+        python scripts/auto_bypass_branch_protection.py
