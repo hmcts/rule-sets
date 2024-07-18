@@ -13,3 +13,7 @@ data "github_branch" "existing_branches" {
   repository = each.value.repo
   branch     = each.value.branch
 }
+
+data "github_user" "current" {
+  username = "ConnorOKane-Kainos"
+}
