@@ -17,3 +17,11 @@ output "branch_count" {
   }
   description = "Summary of branch counts"
 }
+
+# output "existing_branches" {
+#   value = keys(local.existing_branches)
+# }
+
+# output "branch_summary" {
+#   value = local.branch_summary
+# }

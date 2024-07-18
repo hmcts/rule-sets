@@ -1,5 +1,16 @@
-variable "github_token" {
-  description = "GitHub token to use for authentication."
+# variable "github_token" {
+#   description = "GitHub token to use for authentication."
+#   type        = string
+#   sensitive   = true
+# }
+
+# variable "github_username" {
+#   description = "Your GitHub username"
+#   type        = string
+# }
+
+variable "oauth_token" {
+  description = "OAUTH token to use for authentication."
   type        = string
   sensitive   = true
 }
