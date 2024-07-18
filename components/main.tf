@@ -42,11 +42,11 @@ resource "github_repository_ruleset" "default_ruleset" {
     }
   }
 
-  # bypass_actors {
-  #   actor_id = "1"
-  #   bypass_mode = "always"
-  #   actor_type = "OrganizationAdmin"
-  # }
+  bypass_actors {
+    actor_id = "1"
+    bypass_mode = "always"
+    actor_type = "OrganizationAdmin"
+  }
 
   rules {
     creation                = null
