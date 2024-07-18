@@ -81,7 +81,7 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       run: terraform validate
 
-      - name: Terraform Plan
+    - name: Terraform Plan
       working-directory: components
       id: plan
       env:
