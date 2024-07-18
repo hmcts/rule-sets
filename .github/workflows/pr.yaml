@@ -81,7 +81,7 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       run: terraform validate
 
-    - name: Terraform Plan
+    - name: Terraform plan
       working-directory: components
       id: plan
       env:
@@ -90,9 +90,4 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: |
-        echo "Current working directory: $(pwd)"
-        echo "Contents of current directory:"
-        ls -la
-        echo "Attempting to run Terraform plan..."
-        terraform plan -var-file=./terraform.tfvars || terraform plan -var-file=../terraform.tfvars
+      run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
