@@ -27,9 +27,11 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 # Create rulesets for repositories with existing branches
-resource "github_repository_ruleset" "specific_ruleset" {
-  repository  = "test-repo-0oobilw3"
-  name        = "Specific Branch Protection with Bypass"
+resource "github_repository_ruleset" "default_ruleset" {
+  for_each = toset(local.included_repositories)
+
+  repository  = each.key
+  name        = "Default Branch Protection"
   target      = "branch"
   enforcement = "active"
 
@@ -66,14 +68,14 @@ resource "github_repository_ruleset" "specific_ruleset" {
   }
 
   bypass_actors {
-    actor_id    = data.github_organization.org.id
-    actor_type  = "OrganizationAdmin"
+    actor_id    = data.github_user.current.id
+    actor_type  = "User"
     bypass_mode = "always"
   }
 
   bypass_actors {
-    actor_id    = data.github_user.current.id
-    actor_type  = "RepositoryRole"
+    actor_id    = data.github_organization.org.id
+    actor_type  = "OrganizationAdmin"
     bypass_mode = "always"
   }
 }
