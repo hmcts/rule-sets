@@ -75,7 +75,7 @@ resource "github_repository_ruleset" "default_ruleset" {
 
   bypass_actors {
     actor_id    = data.github_organization.org.id
-    actor_type  = "Organization"
+    actor_type  = "OrganizationAdmin"
     bypass_mode = "always"
   }
 }
