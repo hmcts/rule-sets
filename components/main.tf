@@ -68,13 +68,13 @@ resource "github_repository_ruleset" "default_ruleset" {
   }
 
   bypass_actors {
-    actor_id    = data.github_user.current.node_id
+    actor_id    = data.github_user.current.id
     actor_type  = "User"
     bypass_mode = "always"
   }
 
   bypass_actors {
-    actor_id    = data.github_organization.org.node_id
+    actor_id    = data.github_organization.org.id
     actor_type  = "Organization"
     bypass_mode = "always"
   }
