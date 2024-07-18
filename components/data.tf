@@ -15,5 +15,5 @@ data "github_branch" "existing_branches" {
 }
 
 data "github_user" "current" {
-  username = var.github_username
+  username = ""
 }
