@@ -38,8 +38,8 @@ jobs:
     - name: List Repositories and Branches
       run: |
         echo "Checking Repositories and Branches"
-        cat ./test-repos.json
-        for repo in $(jq -r '.[]' ./test-repos.json); do
+        cat ./production-repos.json.json
+        for repo in $(jq -r '.[]' ./production-repos.json.json); do
           echo "Checking repository: $repo"
           curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
