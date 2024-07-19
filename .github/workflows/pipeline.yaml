@@ -41,13 +41,13 @@ jobs:
         cat ./production-repos.json
         for repo in $(jq -r '.[]' ./production-repos.json); do
           echo "Checking repository: $repo"
-          curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+          curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/hmcts/$repo
   
           for branch in main master; do
             echo "Checking branch: $branch in repository: $repo"
-            curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
                  -H "Accept: application/vnd.github.v3+json" \
                  https://api.github.com/repos/hmcts/$repo/branches/$branch
           done
@@ -72,8 +72,8 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}"
+        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
+      run: terraform plan -var="github_token=${{ secrets.OAUTH_TOKEN }}"
 
     - name: Terraform Apply
       working-directory: components
@@ -82,5 +82,5 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: terraform apply -var="github_token=${{ secrets.PAT_TOKEN }}" -auto-approve
+        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
+      run: terraform apply -var="github_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
