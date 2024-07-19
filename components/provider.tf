@@ -3,8 +3,8 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = "hmcts"
-  token = var.github_token
+  owner = "hmcts-test"
+  token = var.oauth_token
 }
 
 terraform {
@@ -18,16 +18,26 @@ terraform {
     use_oidc             = true
     use_azuread_auth     = true
   }
+}
 
+terraform {
   required_providers {
     github = {
       source  = "integrations/github"
-      version = "6.2.1"
-    }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.109.0"
+      version = "~> 5.0"
     }
   }
 }
+
+#   required_providers {
+#     github = {
+#       source  = "integrations/github"
+#       version = "6.2.1"
+#     }
+#     azurerm = {
+#       source  = "hashicorp/azurerm"
+#       version = "3.109.0"
+#     }
+#   }
+# }
 
