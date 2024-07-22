@@ -1,5 +1,5 @@
-data "github_organization" "org" {
-  name = "hmcts-test"
+data "github_team" "admin"{
+  slug = "test"
 }
 
 data "local_file" "repos_json" {
@@ -12,8 +12,4 @@ data "github_branch" "existing_branches" {
   }
   repository = each.value.repo
   branch     = each.value.branch
-}
-
-data "github_user" "current" {
-  username = ""
 }
