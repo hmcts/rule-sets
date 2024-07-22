@@ -1,9 +1,3 @@
-variable "oauth_token" {
-  description = "OAUTH token to use for authentication."
-  type        = string
-  sensitive   = true
-}
-
 variable "branches" {
   description = "List of branches to apply protection rules"
   type        = list(string)
