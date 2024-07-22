@@ -2,11 +2,6 @@ provider "azurerm" {
   features {}
 }
 
-provider "github" {
-  owner = "hmcts-test"
-  token = var.oauth_token
-}
-
 terraform {
   required_version = ">= 1.5.7"
 
