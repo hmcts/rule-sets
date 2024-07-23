@@ -26,11 +26,7 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-# Create rulesets for repositories with existing branches
-resource "github_repository_ruleset" "default_ruleset" {
-  for_each = toset(local.included_repositories)
-
-  repository  = each.key
+resource "github_organization_ruleset" "default_ruleset" {
   name        = "Default Branch Protection"
   target      = "branch"
   enforcement = "active"
@@ -38,6 +34,10 @@ resource "github_repository_ruleset" "default_ruleset" {
   conditions {
     ref_name {
       include = ["refs/heads/main", "refs/heads/master"]
+      exclude = []
+    }
+    repository_name {
+      include = local.included_repositories
       exclude = []
     }
   }
