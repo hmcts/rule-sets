@@ -1,5 +1,5 @@
 data "github_team" "admin"{
-  slug = "test"
+  slug = "Platform Operations"
 }
 
 data "local_file" "repos_json" {

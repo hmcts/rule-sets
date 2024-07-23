@@ -16,9 +16,7 @@ variable "branches" {
 variable "excluded_repositories" {
   description = "List of repositories to exclude from branch protection rules"
   type        = list(string)
-  default = [
-    "github-repository-rules"
-  ]
+  default = []
 }
 
 variable "override_action" {
