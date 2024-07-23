@@ -1,4 +1,4 @@
-data "github_team" "admin"{
+data "github_team" "admin" {
   slug = "test"
 }
 
