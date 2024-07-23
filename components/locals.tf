@@ -1,8 +1,6 @@
 locals {
   # List of repositories to exclude from the production-repos.json file
-  excluded_repositories = [
-    "test-repo-uteppyig",
-  ]
+  excluded_repositories = ["github-repository-rules"]
 
   # Read repositories from JSON file
   all_repositories = jsondecode(data.local_file.repos_json.content)
@@ -44,10 +42,7 @@ locals {
       master = contains(keys(local.existing_branches), "${repo}:master")
     }
   }
-}
 
-
-locals {
   env_display_names = {
     sbox    = "Sandbox"
     prod    = "Production"
