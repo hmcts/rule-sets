@@ -6,7 +6,7 @@ import os
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 ORGANIZATION = 'hmcts-test'
 RULESET_ID = '1239224'
-REPO_FILE = '../production_repos.json'  # Path to your JSON file
+REPO_FILE = 'production_repos.json'  # Path to your JSON file
 
 # Headers for authentication
 headers = {
