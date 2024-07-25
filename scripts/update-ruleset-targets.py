@@ -20,7 +20,6 @@ def load_repositories(file_path):
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
-        # Check if data is a list
         if isinstance(data, list):
             return data
         else:
@@ -32,23 +31,29 @@ def load_repositories(file_path):
 # Function to get the current ruleset
 def get_ruleset(org, ruleset_id):
     url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
+    print(f"Fetching ruleset from URL: {url}")
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching ruleset: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
         raise
 
 # Function to update the ruleset
 def update_ruleset(org, ruleset_id, data):
     url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
+    print(f"Updating ruleset at URL: {url} with data: {json.dumps(data)}")
     try:
         response = requests.patch(url, headers=headers, data=json.dumps(data))
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error updating ruleset: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
         raise
 
 # Main logic
