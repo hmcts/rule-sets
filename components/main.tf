@@ -91,9 +91,8 @@ resource "github_organization_ruleset" "default_ruleset" {
   }
 
   rules {
-    creation                = null
-    update                  = null
     deletion                = false
+    update                  = false  # Changed from null to false
     required_linear_history = true
 
     pull_request {
