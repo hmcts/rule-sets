@@ -26,10 +26,58 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
+# resource "github_organization_ruleset" "default_ruleset" {
+#   name        = local.org_ruleset.name
+#   target      = local.org_ruleset.target
+#   enforcement = local.org_ruleset.enforcement
+
+#   conditions {
+#     repository_name {
+#       include = local.included_repositories
+#       exclude = []
+#     }
+#     ref_name {
+#       include = local.org_ruleset.conditions.ref_name.include
+#       exclude = local.org_ruleset.conditions.ref_name.exclude
+#     }
+#   }
+
+#   rules {
+#     creation                = local.org_ruleset.rules.creation
+#     update                  = local.org_ruleset.rules.update
+#     deletion                = local.org_ruleset.rules.deletion
+#     required_linear_history = local.org_ruleset.rules.required_linear_history
+
+#     pull_request {
+#       dismiss_stale_reviews_on_push     = local.org_ruleset.rules.pull_request.dismiss_stale_reviews_on_push
+#       require_code_owner_review         = local.org_ruleset.rules.pull_request.require_code_owner_review
+#       required_approving_review_count   = local.org_ruleset.rules.pull_request.required_approving_review_count
+#       require_last_push_approval        = local.org_ruleset.rules.pull_request.require_last_push_approval
+#       required_review_thread_resolution = local.org_ruleset.rules.pull_request.required_review_thread_resolution
+#     }
+
+#     required_status_checks {
+#       strict_required_status_checks_policy = local.org_ruleset.rules.required_status_checks.strict_required_status_checks_policy
+#       dynamic "required_check" {
+#         for_each = local.org_ruleset.rules.required_status_checks.required_checks
+#         content {
+#           context = required_check.value.context
+#         }
+#       }
+#     }
+#   }
+
+#   bypass_actors {
+#     actor_id    = data.github_organization.org.id
+#     actor_type  = "OrganizationAdmin"
+#     bypass_mode = "always"
+#   }
+# }
+
 resource "github_organization_ruleset" "default_ruleset" {
-  name        = local.org_ruleset.name
-  target      = local.org_ruleset.target
-  enforcement = local.org_ruleset.enforcement
+  name        = "Default Branch Protection"
+  target      = "branch"
+  enforcement = "active"
 
   conditions {
     repository_name {
@@ -37,38 +85,38 @@ resource "github_organization_ruleset" "default_ruleset" {
       exclude = []
     }
     ref_name {
-      include = local.org_ruleset.conditions.ref_name.include
-      exclude = local.org_ruleset.conditions.ref_name.exclude
+      include = ["refs/heads/main", "refs/heads/master"]
+      exclude = []
     }
   }
 
   rules {
-    creation                = local.org_ruleset.rules.creation
-    update                  = local.org_ruleset.rules.update
-    deletion                = local.org_ruleset.rules.deletion
-    required_linear_history = local.org_ruleset.rules.required_linear_history
+    creation                = null
+    update                  = null
+    deletion                = false
+    required_linear_history = true
 
     pull_request {
-      dismiss_stale_reviews_on_push     = local.org_ruleset.rules.pull_request.dismiss_stale_reviews_on_push
-      require_code_owner_review         = local.org_ruleset.rules.pull_request.require_code_owner_review
-      required_approving_review_count   = local.org_ruleset.rules.pull_request.required_approving_review_count
-      require_last_push_approval        = local.org_ruleset.rules.pull_request.require_last_push_approval
-      required_review_thread_resolution = local.org_ruleset.rules.pull_request.required_review_thread_resolution
+      dismiss_stale_reviews_on_push     = true
+      require_code_owner_review         = false
+      required_approving_review_count   = 1
+      require_last_push_approval        = true
+      required_review_thread_resolution = true
     }
 
     required_status_checks {
-      strict_required_status_checks_policy = local.org_ruleset.rules.required_status_checks.strict_required_status_checks_policy
-      dynamic "required_check" {
-        for_each = local.org_ruleset.rules.required_status_checks.required_checks
-        content {
-          context = required_check.value.context
-        }
+      strict_required_status_checks_policy = true
+      required_check {
+        context = "ci/lint"
+      }
+      required_check {
+        context = "ci/test"
       }
     }
   }
 
   bypass_actors {
-    actor_id    = data.github_organization.org.id
+    actor_id    = data.github_organization.org.node_id
     actor_type  = "OrganizationAdmin"
     bypass_mode = "always"
   }
