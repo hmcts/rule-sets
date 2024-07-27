@@ -44,10 +44,8 @@ locals {
       master = contains(keys(local.existing_branches), "${repo}:master")
     }
   }
-}
 
-
-locals {
+  # Environment display names
   env_display_names = {
     sbox    = "Sandbox"
     prod    = "Production"
@@ -55,6 +53,8 @@ locals {
     test    = "Test"
     staging = "staging"
   }
+
+  # Common tags
   common_tags = {
     "managedBy"          = "DevOps"
     "solutionOwner"      = "RDO"
@@ -63,9 +63,40 @@ locals {
     "automation"         = ""
     "costCentre"         = ""
   }
+
+  # Enforced tags
   enforced_tags = module.tags.common_tags
+
+  # Organization ruleset configuration
+  org_ruleset = {
+    name        = "Default Branch Protection"
+    target      = "branch"
+    enforcement = "active"
+    conditions = {
+      ref_name = {
+        include = ["refs/heads/main", "refs/heads/master"]
+        exclude = []
+      }
+    }
+    rules = {
+      creation                = null
+      update                  = null
+      deletion                = false
+      required_linear_history = true
+      pull_request = {
+        dismiss_stale_reviews_on_push     = true
+        require_code_owner_review         = false
+        required_approving_review_count   = 1
+        require_last_push_approval        = true
+        required_review_thread_resolution = true
+      }
+      required_status_checks = {
+        strict_required_status_checks_policy = true
+        required_checks = [
+          {context = "ci/lint"},
+          {context = "ci/test"}
+        ]
+      }
+    }
+  }
 }
-
-
-
-
