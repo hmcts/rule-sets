@@ -44,8 +44,10 @@ locals {
       master = contains(keys(local.existing_branches), "${repo}:master")
     }
   }
+}
 
-  # Environment display names
+
+locals {
   env_display_names = {
     sbox    = "Sandbox"
     prod    = "Production"
@@ -53,8 +55,6 @@ locals {
     test    = "Test"
     staging = "staging"
   }
-
-  # Common tags
   common_tags = {
     "managedBy"          = "DevOps"
     "solutionOwner"      = "RDO"
@@ -63,7 +63,9 @@ locals {
     "automation"         = ""
     "costCentre"         = ""
   }
-
-  # Enforced tags
   enforced_tags = module.tags.common_tags
 }
+
+
+
+
