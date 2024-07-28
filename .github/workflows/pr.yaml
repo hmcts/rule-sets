@@ -99,5 +99,5 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform apply -var="oauth_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: terraform apply -auto-approve
