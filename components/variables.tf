@@ -1,8 +1,8 @@
-variable "oauth_token" {
-  description = "OAUTH token to use for authentication."
-  type        = string
-  sensitive   = true
-}
+# variable "oauth_token" {
+#   description = "OAUTH token to use for authentication."
+#   type        = string
+#   sensitive   = true
+# }
 
 variable "pat_token" {
   description = "OAUTH token to use for authentication."
