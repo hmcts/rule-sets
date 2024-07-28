@@ -93,8 +93,8 @@ locals {
       required_status_checks = {
         strict_required_status_checks_policy = true
         required_checks = [
-          {context = "ci/lint"},
-          {context = "ci/test"}
+          { context = "ci/lint" },
+          { context = "ci/test" }
         ]
       }
     }
