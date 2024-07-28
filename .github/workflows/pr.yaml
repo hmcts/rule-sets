@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - master
+      - adding-ruleset-org-level
 
 env:
   TF_LOG: INFO
@@ -28,25 +29,16 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
     
-    # Log into Azure with OIDC integration  
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-
-        
-    - name: Check token permissions
-      run: |
-          curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/user
     
     - name: Install jq
       run: sudo apt-get install jq -y
     
-    # List all the repos and branches that the rules are going to be applied on
     - name: List Repositories and Branches
       run: |
           echo "Checking Repositories and Branches"
@@ -61,7 +53,7 @@ jobs:
               echo "Checking branch: $branch in repository: $repo"
               curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
                    -H "Accept: application/vnd.github.v3+json" \
-                   https://api.github.com/repos/hmcts/$repo/branches/$branch
+                   https://api.github.com/repos/hmcts-test/$repo/branches/$branch
             done
           done
 
@@ -102,13 +94,3 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
-
-    - name: Terraform Apply
-      working-directory: components
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform apply -var="oauth_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
