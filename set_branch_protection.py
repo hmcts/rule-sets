@@ -31,26 +31,37 @@ def get_repositories():
 
 def set_branch_protection(repo):
     """Set branch protection rules for a repository."""
-    url = f"https://api.github.com/repos/{ORG_NAME}/{repo}/branches/main/protection"
-    protection_rules = {
-        "required_status_checks": {
-            "strict": True,
-            "contexts": ["ci/circleci: build", "security/snyk"]
-        },
-        "enforce_admins": True,
-        "required_pull_request_reviews": {
-            "dismiss_stale_reviews": True,
-            "require_code_owner_reviews": True,
-            "required_approving_review_count": 2
-        },
-        "restrictions": None
-    }
+    branches_to_try = ["main", "master"]
     
-    response = requests.put(url, headers=headers, json=protection_rules)
-    if response.status_code == 200:
-        print(f"Successfully set branch protection for {repo}")
-    else:
-        print(f"Failed to set branch protection for {repo}: {response.status_code} - {response.text}")
+    for branch in branches_to_try:
+        url = f"https://api.github.com/repos/{ORG_NAME}/{repo}/branches/{branch}"
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            protection_url = f"{url}/protection"
+            protection_rules = {
+                "required_status_checks": {
+                    "strict": True,
+                    "contexts": ["ci/circleci: build", "security/snyk"]
+                },
+                "enforce_admins": True,
+                "required_pull_request_reviews": {
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": True,
+                    "required_approving_review_count": 2
+                },
+                "restrictions": None
+            }
+            
+            response = requests.put(protection_url, headers=headers, json=protection_rules)
+            if response.status_code == 200:
+                print(f"Successfully set branch protection for {repo} on branch {branch}")
+                return
+            else:
+                print(f"Failed to set branch protection for {repo} on branch {branch}: {response.status_code} - {response.text}")
+                return
+    
+    print(f"No suitable branch found for {repo}")
 
 def main():
     try:
