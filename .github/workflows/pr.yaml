@@ -89,15 +89,5 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
-
-    - name: Terraform Apply
-      working-directory: components
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: terraform apply -var="pat_token=${{ secrets.PAT_TOKEN }}" -auto-approve
+      run: terraform plan -var="pat_token=${{ secrets.PAT_TOKEN }}" -auto-approve
