@@ -92,7 +92,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
 
-      - name: Terraform Apply
+    - name: Terraform Apply
       working-directory: components
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
