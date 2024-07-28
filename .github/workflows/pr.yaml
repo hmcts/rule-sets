@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - adding-ruleset-org-level
 
 env:
   TF_LOG: INFO
