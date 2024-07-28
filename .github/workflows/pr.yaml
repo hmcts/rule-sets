@@ -5,6 +5,13 @@ on:
     branches:
       - master
       - adding-ruleset-org-level
+  push:
+    branches:
+      - master
+      - adding-ruleset-org-level
+
+
+
 
 env:
   TF_LOG: INFO
