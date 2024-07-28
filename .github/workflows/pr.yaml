@@ -54,6 +54,11 @@ jobs:
             done
           done
 
+    - name: Create Organization Ruleset
+      run: |
+        chmod +x ./create_org_ruleset.sh
+        ./create_org_ruleset.sh ${{ secrets.OAUTH_TOKEN }}
+      
     - name: Terraform Init
       working-directory: components
       env:
@@ -65,6 +70,8 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
+
+    # ... rest of your existing steps ...
 
     - name: Terraform format
       working-directory: components
