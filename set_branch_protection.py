@@ -112,7 +112,7 @@ def update_org_ruleset(ruleset_id, repos):
                 "type": "required_linear_history",
             },
             {
-                "type": "required_status_checks",
+                "type": "enforce_admins",
             }
 
         ]
