@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-import sys  # Import sys module
+import sys
 
 # Configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
