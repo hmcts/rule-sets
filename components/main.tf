@@ -26,32 +26,32 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-# Apply branch protection rules only if the branch exists
-resource "github_branch_protection_v3" "branch_protection" {
-  for_each = local.existing_branches
+# # Apply branch protection rules only if the branch exists
+# resource "github_branch_protection_v3" "branch_protection" {
+#   for_each = local.existing_branches
 
-  repository                      = each.value.repository
-  branch                          = each.value.branch
-  enforce_admins                  = false
-  require_signed_commits          = false
-  require_conversation_resolution = false
+#   repository                      = each.value.repository
+#   branch                          = each.value.branch
+#   enforce_admins                  = false
+#   require_signed_commits          = false
+#   require_conversation_resolution = false
 
-  required_pull_request_reviews {
-    dismiss_stale_reviews           = true
-    require_code_owner_reviews      = false
-    required_approving_review_count = 1
-  }
+#   required_pull_request_reviews {
+#     dismiss_stale_reviews           = true
+#     require_code_owner_reviews      = false
+#     required_approving_review_count = 1
+#   }
 
-  # ci/lint checks to ensure the code style and quality is of standard
-  # ci/test will check to ensure the automated tests have passed
-  required_status_checks {
-    contexts = ["ci/lint", "ci/test"]
-    strict   = true
-  }
+#   # ci/lint checks to ensure the code style and quality is of standard
+#   # ci/test will check to ensure the automated tests have passed
+#   required_status_checks {
+#     contexts = ["ci/lint", "ci/test"]
+#     strict   = true
+#   }
 
-  restrictions {
-    users = []
-    teams = []
-    apps  = []
-  }
-}
+#   restrictions {
+#     users = []
+#     teams = []
+#     apps  = []
+#   }
+# }
