@@ -58,7 +58,7 @@ def create_org_ruleset(repos):
                 "parameters": {
                     "dismiss_stale_reviews_on_push": True,
                     "require_code_owner_review": False,
-                    "required_approving_review_count": 1,
+                    "required_approving_review_count": 2,
                     "require_last_push_approval": True,
                     "required_review_thread_resolution": True
                 }
