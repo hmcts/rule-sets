@@ -63,7 +63,7 @@ def apply_branch_protection(org, repo, branch):
         "required_pull_request_reviews": {
             "dismiss_stale_reviews": True,
             "require_code_owner_reviews": True,
-            "required_approving_review_count": 3
+            "required_approving_review_count": 1
         },
         "restrictions": None,
         "required_linear_history": True
