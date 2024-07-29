@@ -86,10 +86,8 @@ def create_or_update_org_ruleset(repos):
                 "parameters": {}
             },
             {
-                "type": "pull_request",
+                "type": "required_pull_request_reviews",
                 "parameters": {
-                    "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_review": False,
                     "required_approving_review_count": 1
                 }
             },
@@ -152,4 +150,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
