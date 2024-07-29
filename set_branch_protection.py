@@ -36,30 +36,11 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
-def get_existing_ruleset(name):
+def create_org_ruleset(repos):
+    """Create an organization-level ruleset and assign repositories to it using REST API."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        rulesets = response.json()
-        for ruleset in rulesets:
-            if ruleset['name'] == name:
-                return ruleset['id']
-    return None
-
-def create_or_update_org_ruleset(repos):
-    """Create or update an organization-level ruleset and assign repositories to it using REST API."""
-    ruleset_name = "Default Organization Ruleset"
-    existing_ruleset_id = get_existing_ruleset(ruleset_name)
     
-    if existing_ruleset_id:
-        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{existing_ruleset_id}"
-        method = requests.patch
-        action = "Updated"
-    else:
-        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-        method = requests.post
-        action = "Created"
-        ruleset_name = f"Organization Ruleset - {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    ruleset_name = f"Organization Ruleset - {datetime.now().strftime('%Y%m%d%H%M%S')}"
     
     ruleset_data = {
         "name": ruleset_name,
@@ -89,21 +70,21 @@ def create_or_update_org_ruleset(repos):
         ]
     }
     
-    print(f"Sending request to {action.lower()} ruleset with the following data:")
+    print(f"Sending request to create ruleset with the following data:")
     print(json.dumps(ruleset_data, indent=2))
     
-    response = method(url, headers=headers, json=ruleset_data)
+    response = requests.post(url, headers=headers, json=ruleset_data)
     
     print(f"Response status code: {response.status_code}")
     print(f"Response headers: {response.headers}")
     print(f"Response content: {response.text}")
     
-    if response.status_code in [200, 201]:
+    if response.status_code == 201:
         ruleset = response.json()
-        print(f"Successfully {action.lower()} organization ruleset '{ruleset['name']}'")
+        print(f"Successfully created organization ruleset '{ruleset['name']}'")
         return ruleset['id']
     else:
-        print(f"Failed to {action.lower()} organization ruleset: {response.status_code} - {response.text}")
+        print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
         error_data = response.json()
         if 'errors' in error_data and isinstance(error_data['errors'], list):
             for error in error_data['errors']:
@@ -120,11 +101,11 @@ def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
-        ruleset_id = create_or_update_org_ruleset(repos)
+        ruleset_id = create_org_ruleset(repos)
         if ruleset_id:
-            print(f"Ruleset created or updated with ID: {ruleset_id}")
+            print(f"Ruleset created with ID: {ruleset_id}")
         else:
-            print("Failed to create or update ruleset")
+            print("Failed to create ruleset")
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
