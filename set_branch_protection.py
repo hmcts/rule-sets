@@ -105,7 +105,18 @@ def update_org_ruleset(ruleset_id, repos):
                 "include": repos,
                 "exclude": []
             }
-        }
+        },
+        "rules": [
+            {
+                "type": "required_linear_history"
+            },
+            {
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "required_approving_review_count": 1
+                }
+            }
+        ]
     }
     
     print("Updating organization ruleset with the following data:")
