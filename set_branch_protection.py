@@ -61,8 +61,7 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history",
-                "parameters": {}
+                "type": "required_linear_history"
             },
             {
                 "type": "required_pull_request_reviews",
@@ -110,11 +109,16 @@ def update_org_ruleset(ruleset_id, repos):
         "rules": [
             {
                 "type": "required_linear_history",
+                "parameters": {}
             },
             {
-                "type": "enforce_admins",
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "required_approving_review_count": 1,
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": True
+                }
             }
-
         ]
     }
     
