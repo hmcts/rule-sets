@@ -17,7 +17,7 @@ print(f"Using token: {GITHUB_TOKEN[:4]}...{GITHUB_TOKEN[-4:]}")
 
 headers = {
     "Authorization": f"token {GITHUB_TOKEN}",
-    "Accept": "application/vnd.github.v3+json"
+    "Accept": "application/vnd.github+json"
 }
 
 def get_repositories():
@@ -39,53 +39,8 @@ def get_existing_ruleset():
         rulesets = response.json()
         for ruleset in rulesets:
             if ruleset['name'] == "Organization-wide Branch Protection Rules":
-                return ruleset
+                return ruleset['id']
     return None
-
-def update_org_ruleset(ruleset_id, repos):
-    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{ruleset_id}"
-    
-    ruleset_data = {
-        "name": "Organization-wide Branch Protection Rules",
-        "target": "branch",
-        "enforcement": "active",
-        "conditions": {
-            "ref_name": {
-                "include": ["refs/heads/main", "refs/heads/master"],
-                "exclude": []
-            },
-            "repository_name": {
-                "include": repos,
-                "exclude": []
-            }
-        },
-        "rules": [
-            {
-                "type": "required_linear_history"
-            },
-            {
-                "type": "required_pull_request_reviews",
-                "parameters": {
-                    "required_approving_review_count": 2,
-                    "dismiss_stale_reviews": True,
-                    "require_code_owner_reviews": True
-                }
-            }
-        ]
-    }
-    
-    print("Updating organization ruleset with the following data:")
-    print(json.dumps(ruleset_data, indent=2))
-    
-    response = requests.patch(url, headers=headers, json=ruleset_data)
-    
-    print(f"Response status code: {response.status_code}")
-    print(f"Response content: {response.text}")
-    
-    if response.status_code in [200, 201]:
-        print("Successfully updated organization ruleset")
-    else:
-        print(f"Failed to update organization ruleset: {response.status_code} - {response.text}")
 
 def create_org_ruleset(repos):
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
@@ -134,15 +89,60 @@ def create_org_ruleset(repos):
         print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
         return None
 
+def update_org_ruleset(ruleset_id, repos):
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{ruleset_id}"
+    
+    ruleset_data = {
+        "name": "Organization-wide Branch Protection Rules",
+        "target": "branch",
+        "enforcement": "active",
+        "conditions": {
+            "ref_name": {
+                "include": ["refs/heads/main", "refs/heads/master"],
+                "exclude": []
+            },
+            "repository_name": {
+                "include": repos,
+                "exclude": []
+            }
+        },
+        "rules": [
+            {
+                "type": "required_linear_history"
+            },
+            {
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "required_approving_review_count": 2,
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": True
+                }
+            }
+        ]
+    }
+    
+    print("Updating organization ruleset with the following data:")
+    print(json.dumps(ruleset_data, indent=2))
+    
+    response = requests.put(url, headers=headers, json=ruleset_data)
+    
+    print(f"Response status code: {response.status_code}")
+    print(f"Response content: {response.text}")
+    
+    if response.status_code in [200, 204]:
+        print("Successfully updated organization ruleset")
+    else:
+        print(f"Failed to update organization ruleset: {response.status_code} - {response.text}")
+
 def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
         
-        existing_ruleset = get_existing_ruleset()
-        if existing_ruleset:
+        ruleset_id = get_existing_ruleset()
+        if ruleset_id:
             print("Existing ruleset found. Updating...")
-            update_org_ruleset(existing_ruleset['id'], repos)
+            update_org_ruleset(ruleset_id, repos)
         else:
             print("No existing ruleset found. Creating new one...")
             create_org_ruleset(repos)
@@ -156,4 +156,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
