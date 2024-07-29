@@ -89,10 +89,10 @@ try:
                         "type": "required_linear_history"
                     },
                     {
-                        "type": "required_pull_request_reviews",
+                        "type": "pull_request_reviews",
                         "parameters": {
                             "required_approving_review_count": 1,
-                            "dismiss_stale_reviews": True,
+                            "dismiss_stale_reviews_on_push": True,
                             "require_code_owner_reviews": False
                         }
                     },
@@ -139,10 +139,10 @@ try:
                     "type": "required_linear_history"
                 },
                 {
-                    "type": "required_pull_request_reviews",
+                    "type": "pull_request_reviews",
                     "parameters": {
                         "required_approving_review_count": 1,
-                        "dismiss_stale_reviews": True,
+                        "dismiss_stale_reviews_on_push": True,
                         "require_code_owner_reviews": False
                     }
                 },
