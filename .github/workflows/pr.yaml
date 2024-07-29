@@ -4,9 +4,14 @@ on:
   pull_request:
     branches:
       - master
-      - updated-file-path
+
+  push:
+    branches:
+      - update-file-path
+      - master
+
   workflow_dispatch:
-    
+
 env:
   TF_LOG: INFO
 
