@@ -79,7 +79,37 @@ try:
             ruleset['conditions']['repository_name']['include'] = target_repositories
 
             # Update the ruleset on GitHub
-            updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, ruleset)
+            updated_ruleset_data = {
+                "name": ruleset['name'],
+                "target": ruleset['target'],
+                "enforcement": ruleset['enforcement'],
+                "conditions": ruleset['conditions'],
+                "rules": [
+                    {
+                        "type": "required_linear_history"
+                    },
+                    {
+                        "type": "required_pull_request_reviews",
+                        "parameters": {
+                            "required_approving_review_count": 1,
+                            "dismiss_stale_reviews": True,
+                            "require_code_owner_reviews": False
+                        }
+                    },
+                    {
+                        "type": "required_status_checks",
+                        "parameters": {
+                            "strict": True,
+                            "contexts": []  # Add specific status checks if needed
+                        }
+                    }
+                ]
+            }
+
+            print("Updating Ruleset with data:")
+            print(json.dumps(updated_ruleset_data, indent=4))
+
+            updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, updated_ruleset_data)
             print("Updated Ruleset:")
             print(json.dumps(updated_ruleset, indent=4))
         except requests.exceptions.HTTPError as http_err:
@@ -139,4 +169,3 @@ except requests.exceptions.HTTPError as http_err:
 except Exception as err:
     print(f"An error occurred: {err}")
     sys.exit(1)
-
