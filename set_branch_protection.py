@@ -110,16 +110,11 @@ def update_org_ruleset(ruleset_id, repos):
         "rules": [
             {
                 "type": "required_linear_history",
-                "parameters": {}
             },
             {
-                "type": "required_pull_request_reviews",
-                "parameters": {
-                    "required_approving_review_count": 2,
-                    "dismiss_stale_reviews": True,
-                    "require_code_owner_reviews": True
-                }
+                "type": "required_status_checks",
             }
+
         ]
     }
     
