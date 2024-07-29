@@ -82,23 +82,27 @@ def create_or_update_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_linear_history",
+                "parameters": {}
             },
             {
-                "type": "required_pull_request_reviews",
+                "type": "pull_request",
                 "parameters": {
+                    "dismiss_stale_reviews_on_push": True,
+                    "require_code_owner_review": False,
                     "required_approving_review_count": 1
                 }
             },
             {
                 "type": "required_status_checks",
                 "parameters": {
-                    "contexts": [],
-                    "strict": True
+                    "strict": True,
+                    "contexts": []
                 }
             },
             {
-                "type": "required_signatures"
+                "type": "required_signatures",
+                "parameters": {}
             }
         ]
     }
