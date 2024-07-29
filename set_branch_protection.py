@@ -25,7 +25,7 @@ headers = {
 def get_repositories():
     """Read repositories from production-repos.json file."""
     try:
-        with open('/mnt/data/production-repos.json', 'r') as f:
+        with open('production-repos.json', 'r') as f:
             repos = json.load(f)
         return repos
     except FileNotFoundError:
