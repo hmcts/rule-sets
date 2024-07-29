@@ -62,23 +62,7 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "pull_request",
-                "parameters": {
-                    "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_review": False,
-                    "required_approving_review_count": 1,
-                    "require_last_push_approval": True,
-                    "required_review_thread_resolution": True
-                }
-            },
-            {
-                "type": "required_status_checks",
-                "parameters": {
-                    "strict_required_status_checks_policy": True,
-                    "required_status_checks": [
-                        {"context": "ci/workflow"}
-                    ]
-                }
+                "type": "required_linear_history"
             }
         ]
     }
