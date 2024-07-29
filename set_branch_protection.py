@@ -2,7 +2,6 @@ import requests
 import os
 import sys
 import json
-from datetime import datetime
 
 # GitHub organization name
 ORG_NAME = "hmcts-test"
@@ -36,91 +35,43 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
-def get_existing_ruleset():
-    """Check for existing ruleset and return its ID if found."""
-    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        rulesets = response.json()
-        for ruleset in rulesets:
-            if ruleset['name'].startswith("Org Ruleset - Branch Protection"):
-                return ruleset['id']
-    return None
-
-def create_or_update_org_ruleset(repos, existing_ruleset_id=None):
-    """Create or update an organization-level ruleset for branch protection."""
-    if existing_ruleset_id:
-        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{existing_ruleset_id}"
-        method = requests.patch
-    else:
-        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-        method = requests.post
-
-    ruleset_name = "Org Ruleset - Branch Protection"
+def update_branch_protection(repo, branch):
+    """Update branch protection for a specific repository and branch."""
+    url = f"https://api.github.com/repos/{ORG_NAME}/{repo}/branches/{branch}/protection"
     
-    ruleset_data = {
-        "name": ruleset_name,
-        "target": "branch",
-        "enforcement": "active",
-        "bypass_actors": [
-            {
-                "actor_id": 1,
-                "actor_type": "OrganizationAdmin",
-                "bypass_mode": "always"
-            }
-        ],
-        "conditions": {
-            "ref_name": {
-                "include": ["refs/heads/main", "refs/heads/master"],
-                "exclude": []
-            },
-            "repository_name": {
-                "include": repos,
-                "exclude": []
-            }
+    protection_data = {
+        "required_status_checks": None,
+        "enforce_admins": True,
+        "required_pull_request_reviews": {
+            "dismiss_stale_reviews": True,
+            "require_code_owner_reviews": False,
+            "required_approving_review_count": 1
         },
-        "rules": [
-            {
-                "type": "pull_request",
-                "parameters": {
-                    "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_review": False,
-                    "required_approving_review_count": 1
-                }
-            }
-        ]
+        "restrictions": None,
+        "required_linear_history": True,
+        "allow_force_pushes": False,
+        "allow_deletions": False
     }
     
-    print(f"Sending request to {'update' if existing_ruleset_id else 'create'} ruleset with the following data:")
-    print(json.dumps(ruleset_data, indent=2))
-    
-    response = method(url, headers=headers, json=ruleset_data)
+    print(f"Updating branch protection for {repo}/{branch}")
+    response = requests.put(url, headers=headers, json=protection_data)
     
     print(f"Response status code: {response.status_code}")
     print(f"Response content: {response.text}")
     
     if response.status_code in [200, 201]:
-        ruleset = response.json()
-        print(f"Successfully {'updated' if existing_ruleset_id else 'created'} organization ruleset '{ruleset['name']}'")
-        return ruleset['id']
+        print(f"Successfully updated branch protection for {repo}/{branch}")
     else:
-        print(f"Failed to {'update' if existing_ruleset_id else 'create'} organization ruleset: {response.status_code} - {response.text}")
-        return None
+        print(f"Failed to update branch protection for {repo}/{branch}: {response.status_code} - {response.text}")
 
 def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
         
-        existing_ruleset_id = get_existing_ruleset()
-        if existing_ruleset_id:
-            print(f"Found existing ruleset with ID: {existing_ruleset_id}")
-        
-        ruleset_id = create_or_update_org_ruleset(repos, existing_ruleset_id)
-        if ruleset_id:
-            print(f"Ruleset {'updated' if existing_ruleset_id else 'created'} with ID: {ruleset_id}")
-        else:
-            print("Failed to create or update ruleset")
+        for repo in repos:
+            for branch in ['main', 'master']:
+                update_branch_protection(repo, branch)
         
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
