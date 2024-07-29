@@ -100,23 +100,7 @@ try:
             "rules": [
                 {
                     "type": "required_linear_history",
-                    "parameters": {}  # Required even if empty
                 },
-                {
-                    "type": "required_pull_request_reviews",
-                    "parameters": {
-                        "required_approving_review_count": 1,
-                        "dismiss_stale_reviews_on_push": True,
-                        "require_code_owner_review": False
-                    }
-                },
-                {
-                    "type": "required_status_checks",
-                    "parameters": {
-                        "strict": True,
-                        "contexts": []  # Add specific status checks if needed
-                    }
-                }
             ]
         }
         print("Creating New Ruleset with data:")
