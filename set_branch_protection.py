@@ -2,6 +2,7 @@ import requests
 import os
 import sys
 import json
+from datetime import datetime
 
 # GitHub organization name
 ORG_NAME = "hmcts-test"
@@ -50,9 +51,15 @@ def create_or_update_org_ruleset(repos):
     ruleset_name = "Default Organization Ruleset"
     existing_ruleset_id = get_existing_ruleset(ruleset_name)
     
-    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    method = requests.post
-    action = "Created"
+    if existing_ruleset_id:
+        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{existing_ruleset_id}"
+        method = requests.patch
+        action = "Updated"
+    else:
+        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+        method = requests.post
+        action = "Created"
+        ruleset_name = f"Organization Ruleset - {datetime.now().strftime('%Y%m%d%H%M%S')}"
     
     ruleset_data = {
         "name": ruleset_name,
