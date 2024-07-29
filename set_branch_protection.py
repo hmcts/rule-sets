@@ -1,12 +1,17 @@
 import requests
 import json
 import os
+import sys  # Import sys module
 
 # Configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 ORGANIZATION = 'hmcts-test'
 RULESET_ID = '1239224'
 REPO_FILE = 'production-repos.json'
+
+if not GITHUB_TOKEN:
+    print("Error: GITHUB_TOKEN not found in environment variables.")
+    sys.exit(1)
 
 # Headers for authentication
 headers = {
@@ -57,6 +62,9 @@ try:
     print("Updated Ruleset:")
     print(json.dumps(updated_ruleset, indent=4))
 
-except Exception as e:
-    print(f"An error occurred: {e}")
+except requests.exceptions.HTTPError as http_err:
+    print(f"HTTP error occurred: {http_err}")
+    sys.exit(1)
+except Exception as err:
+    print(f"An error occurred: {err}")
     sys.exit(1)
