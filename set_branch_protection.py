@@ -54,11 +54,11 @@ def create_org_ruleset(repos):
                 "type": "required_linear_history"
             },
             {
-                "type": "required_pull_request_reviews",
+                "type": "pull_request",
                 "parameters": {
+                    "dismiss_stale_reviews_on_push": True,
+                    "require_code_owner_review": False,
                     "required_approving_review_count": 1,
-                    "dismiss_stale_reviews": True,
-                    "require_code_owner_reviews": False,
                     "require_last_push_approval": True,
                     "required_review_thread_resolution": True
                 }
