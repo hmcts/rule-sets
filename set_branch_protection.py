@@ -81,15 +81,12 @@ def create_or_update_org_ruleset(repos, existing_ruleset_id=None):
         },
         "rules": [
             {
-                "type": "branch_name_pattern",
+                "type": "pull_request",
                 "parameters": {
-                    "name": "main",
-                    "negate": False
+                    "dismiss_stale_reviews_on_push": True,
+                    "require_code_owner_review": False,
+                    "required_approving_review_count": 1
                 }
-            },
-            {
-                "type": "non_fast_forward",
-                "parameters": {}
             }
         ]
     }
