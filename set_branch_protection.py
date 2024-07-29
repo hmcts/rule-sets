@@ -119,36 +119,4 @@ def create_or_update_org_ruleset(repos):
     if response.status_code in [200, 201]:
         ruleset = response.json()
         print(f"Successfully {action.lower()} organization ruleset '{ruleset['name']}'")
-        return ruleset['id']
-    else:
-        print(f"Failed to {action.lower()} organization ruleset: {response.status_code} - {response.text}")
-        error_data = response.json()
-        if 'errors' in error_data and isinstance(error_data['errors'], list):
-            for error in error_data['errors']:
-                if isinstance(error, dict):
-                    print(f"Error: {error.get('message', 'Unknown error')}")
-                    print(f"Location: {error.get('resource', 'Unknown')} - {error.get('field', 'Unknown')}")
-                else:
-                    print(f"Error: {error}")
-        elif 'message' in error_data:
-            print(f"Error message: {error_data['message']}")
-        return None
-
-def main():
-    try:
-        repos = get_repositories()
-        print(f"Found {len(repos)} repositories in production-repos.json")
-        ruleset_id = create_or_update_org_ruleset(repos)
-        if ruleset_id:
-            print(f"Ruleset created or updated with ID: {ruleset_id}")
-        else:
-            print("Failed to create or update ruleset")
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        sys.exit(1)
-
-if __name__ == "__main__":
-    main()
+        re
