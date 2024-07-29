@@ -88,6 +88,8 @@ def create_or_update_org_ruleset(repos):
             {
                 "type": "required_pull_request_reviews",
                 "parameters": {
+                    "dismiss_stale_reviews_on_push": True,
+                    "require_code_owner_review": False,
                     "required_approving_review_count": 1
                 }
             },
