@@ -139,3 +139,4 @@ except requests.exceptions.HTTPError as http_err:
 except Exception as err:
     print(f"An error occurred: {err}")
     sys.exit(1)
+
