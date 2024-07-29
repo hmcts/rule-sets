@@ -25,7 +25,7 @@ headers = {
 def get_repositories():
     """Read repositories from production-repos.json file."""
     try:
-        with open('production-repos.json', 'r') as f:
+        with open('/mnt/data/production-repos.json', 'r') as f:
             repos = json.load(f)
         return repos
     except FileNotFoundError:
@@ -53,6 +53,11 @@ def create_or_update_org_ruleset(repos):
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
     method = requests.post
     action = "Created"
+
+    if existing_ruleset_id:
+        url = f"{url}/{existing_ruleset_id}"
+        method = requests.patch
+        action = "Updated"
     
     ruleset_data = {
         "name": ruleset_name,
@@ -78,6 +83,22 @@ def create_or_update_org_ruleset(repos):
         "rules": [
             {
                 "type": "required_linear_history"
+            },
+            {
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "required_approving_review_count": 1
+                }
+            },
+            {
+                "type": "required_status_checks",
+                "parameters": {
+                    "contexts": [],
+                    "strict": True
+                }
+            },
+            {
+                "type": "required_signatures"
             }
         ]
     }
