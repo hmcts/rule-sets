@@ -43,6 +43,13 @@ def create_org_ruleset(repos):
         "name": "Default Organization Ruleset",
         "target": "branch",
         "enforcement": "active",
+        "bypass_actors": [
+            {
+                "actor_id": 1,
+                "actor_type": "OrganizationAdmin",
+                "bypass_mode": "always"
+            }
+        ],
         "conditions": {
             "ref_name": {
                 "include": ["refs/heads/main", "refs/heads/master"],
@@ -55,7 +62,23 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "pull_request",
+                "parameters": {
+                    "dismiss_stale_reviews_on_push": True,
+                    "require_code_owner_review": False,
+                    "required_approving_review_count": 1,
+                    "require_last_push_approval": True,
+                    "required_review_thread_resolution": True
+                }
+            },
+            {
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict_required_status_checks_policy": True,
+                    "required_status_checks": [
+                        {"context": "ci/workflow"}
+                    ]
+                }
             }
         ]
     }
