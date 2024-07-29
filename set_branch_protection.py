@@ -35,17 +35,6 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
-def check_existing_ruleset():
-    """Check if a ruleset with the same name already exists."""
-    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        rulesets = response.json()
-        for ruleset in rulesets:
-            if ruleset['name'] == "Default Organization Ruleset":
-                return ruleset['id']
-    return None
-
 def create_org_ruleset(repos):
     """Create an organization-level ruleset and assign repositories to it using REST API."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
@@ -68,27 +57,16 @@ def create_org_ruleset(repos):
             {
                 "type": "deletion",
                 "parameters": {
-                    "allow_force_pushes": False,
                     "allow_deletions": False
                 }
             },
             {
-                "type": "pull_request",
+                "type": "required_pull_request_reviews",
                 "parameters": {
-                    "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_review": False,
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": False,
                     "required_approving_review_count": 1,
                     "require_last_push_approval": True
-                }
-            },
-            {
-                "type": "required_status_checks",
-                "parameters": {
-                    "strict_required_status_checks_policy": True,
-                    "required_status_checks": [
-                        {"context": "ci/test"},
-                        {"context": "security/scan"}
-                    ]
                 }
             }
         ]
@@ -109,7 +87,6 @@ def create_org_ruleset(repos):
         return ruleset['id']
     else:
         print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
-        # Additional error handling
         if response.status_code == 422:
             error_data = response.json()
             if 'errors' in error_data:
