@@ -1,171 +1,129 @@
 import requests
-import json
 import os
 import sys
+import json
 
-# Configuration
-GITHUB_TOKEN = os.getenv('PAT_TOKEN')
-ORGANIZATION = 'hmcts-test'
-RULESET_NAME = 'Default Organization Ruleset'
-REPO_FILE = 'production-repos.json'
+# GitHub organization name
+ORG_NAME = "hmcts-test"
+
+# GitHub PAT Token
+GITHUB_TOKEN = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PAT_TOKEN")
 
 if not GITHUB_TOKEN:
-    print("Error: PAT_TOKEN not found in environment variables.")
+    print("Error: PAT_TOKEN not found in environment variables or command line arguments")
     sys.exit(1)
 
-# Headers for authentication
+# Print masked token for debugging
+print(f"Using token: {GITHUB_TOKEN[:4]}...{GITHUB_TOKEN[-4:]}")
+
+# Headers for GitHub API requests
 headers = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github+json',
-    'Content-Type': 'application/json'
+    "Authorization": f"token {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github.v3+json"
 }
 
-# Function to load repositories from JSON file
-def load_repositories(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-        if isinstance(data, list):
-            return data
-        else:
-            raise ValueError("Unexpected JSON format. Expected a list of repositories.")
+def get_repositories():
+    """Read repositories from production-repos.json file."""
+    try:
+        with open('production-repos.json', 'r') as f:
+            repos = json.load(f)
+        return repos
+    except FileNotFoundError:
+        print("Error: production-repos.json file not found")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        print("Error: Invalid JSON in production-repos.json")
+        sys.exit(1)
 
-# Function to get the existing ruleset by name
-def get_existing_ruleset(org, ruleset_name):
-    url = f'https://api.github.com/orgs/{org}/rulesets'
+def get_existing_ruleset(name):
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
     response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    rulesets = response.json()
-    for ruleset in rulesets:
-        if ruleset['name'] == ruleset_name:
-            return ruleset['id']
+    if response.status_code == 200:
+        rulesets = response.json()
+        for ruleset in rulesets:
+            if ruleset['name'] == name:
+                return ruleset['id']
     return None
 
-# Function to get the current ruleset by ID
-def get_ruleset(org, ruleset_id):
-    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
-
-# Function to create a new ruleset
-def create_ruleset(org, data):
-    url = f'https://api.github.com/orgs/{org}/rulesets'
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    response.raise_for_status()
-    return response.json()
-
-# Function to update the existing ruleset
-def update_ruleset(org, ruleset_id, data):
-    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
-    response = requests.put(url, headers=headers, data=json.dumps(data))
-    response.raise_for_status()
-    return response.json()
-
-try:
-    # Load repositories from JSON file
-    target_repositories = load_repositories(REPO_FILE)
-    print(f"Loaded repositories: {target_repositories}")
-
-    # Check if the ruleset exists
-    ruleset_id = get_existing_ruleset(ORGANIZATION, RULESET_NAME)
-    if ruleset_id:
-        # Get the current ruleset data
-        try:
-            ruleset = get_ruleset(ORGANIZATION, ruleset_id)
-            print("Current Ruleset:")
-            print(json.dumps(ruleset, indent=4))
-
-            # Update the repository_name condition
-            ruleset['conditions']['repository_name']['include'] = target_repositories
-
-            # Update the ruleset on GitHub
-            updated_ruleset_data = {
-                "name": ruleset['name'],
-                "target": ruleset['target'],
-                "enforcement": ruleset['enforcement'],
-                "conditions": ruleset['conditions'],
-                "rules": [
-                    {
-                        "type": "required_linear_history"
-                    },
-                    {
-                        "type": "pull_request_reviews",
-                        "parameters": {
-                            "required_approving_review_count": 1,
-                            "dismiss_stale_reviews_on_push": True,
-                            "require_code_owner_reviews": False
-                        }
-                    },
-                    {
-                        "type": "required_status_checks",
-                        "parameters": {
-                            "strict": True,
-                            "contexts": []  # Add specific status checks if needed
-                        }
-                    }
-                ]
+def create_or_update_org_ruleset(repos):
+    """Create or update an organization-level ruleset and assign repositories to it using REST API."""
+    ruleset_name = "Default Organization Ruleset"
+    existing_ruleset_id = get_existing_ruleset(ruleset_name)
+    
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+    method = requests.post
+    action = "Created"
+    
+    ruleset_data = {
+        "name": ruleset_name,
+        "target": "branch",
+        "enforcement": "active",
+        "bypass_actors": [
+            {
+                "actor_id": 1,
+                "actor_type": "OrganizationAdmin",
+                "bypass_mode": "always"
             }
-
-            print("Updating Ruleset with data:")
-            print(json.dumps(updated_ruleset_data, indent=4))
-
-            updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, updated_ruleset_data)
-            print("Updated Ruleset:")
-            print(json.dumps(updated_ruleset, indent=4))
-        except requests.exceptions.HTTPError as http_err:
-            if http_err.response.status_code == 404:
-                print(f"Ruleset with ID {ruleset_id} not found. Creating a new ruleset.")
-                ruleset_id = None
-            else:
-                raise
-    if not ruleset_id:
-        # Create a new ruleset
-        new_ruleset_data = {
-            "name": RULESET_NAME,
-            "target": "branch",
-            "enforcement": "active",
-            "conditions": {
-                "ref_name": {
-                    "include": ["refs/heads/main", "refs/heads/master"],
-                    "exclude": []
-                },
-                "repository_name": {
-                    "include": target_repositories,
-                    "exclude": []
-                }
+        ],
+        "conditions": {
+            "ref_name": {
+                "include": ["refs/heads/main", "refs/heads/master"],
+                "exclude": []
             },
-            "rules": [
-                {
-                    "type": "required_linear_history"
-                },
-                {
-                    "type": "pull_request_reviews",
-                    "parameters": {
-                        "required_approving_review_count": 1,
-                        "dismiss_stale_reviews_on_push": True,
-                        "require_code_owner_reviews": False
-                    }
-                },
-                {
-                    "type": "required_status_checks",
-                    "parameters": {
-                        "strict": True,
-                        "contexts": []  # Add specific status checks if needed
-                    }
-                }
-            ]
-        }
-        print("Creating New Ruleset with data:")
-        print(json.dumps(new_ruleset_data, indent=4))
+            "repository_name": {
+                "include": repos,
+                "exclude": []
+            }
+        },
+        "rules": [
+            {
+                "type": "required_linear_history"
+            }
+        ]
+    }
+    
+    print(f"Sending request to {action.lower()} ruleset with the following data:")
+    print(json.dumps(ruleset_data, indent=2))
+    
+    response = method(url, headers=headers, json=ruleset_data)
+    
+    print(f"Response status code: {response.status_code}")
+    print(f"Response headers: {response.headers}")
+    print(f"Response content: {response.text}")
+    
+    if response.status_code in [200, 201]:
+        ruleset = response.json()
+        print(f"Successfully {action.lower()} organization ruleset '{ruleset['name']}'")
+        return ruleset['id']
+    else:
+        print(f"Failed to {action.lower()} organization ruleset: {response.status_code} - {response.text}")
+        error_data = response.json()
+        if 'errors' in error_data and isinstance(error_data['errors'], list):
+            for error in error_data['errors']:
+                if isinstance(error, dict):
+                    print(f"Error: {error.get('message', 'Unknown error')}")
+                    print(f"Location: {error.get('resource', 'Unknown')} - {error.get('field', 'Unknown')}")
+                else:
+                    print(f"Error: {error}")
+        elif 'message' in error_data:
+            print(f"Error message: {error_data['message']}")
+        return None
 
-        created_ruleset = create_ruleset(ORGANIZATION, new_ruleset_data)
-        print("Created New Ruleset:")
-        print(json.dumps(created_ruleset, indent=4))
+def main():
+    try:
+        repos = get_repositories()
+        print(f"Found {len(repos)} repositories in production-repos.json")
+        ruleset_id = create_or_update_org_ruleset(repos)
+        if ruleset_id:
+            print(f"Ruleset created or updated with ID: {ruleset_id}")
+        else:
+            print("Failed to create or update ruleset")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
 
-except requests.exceptions.HTTPError as http_err:
-    print(f"HTTP error occurred: {http_err}")
-    print(f"Response content: {http_err.response.content.decode()}")
-    sys.exit(1)
-except Exception as err:
-    print(f"An error occurred: {err}")
-    sys.exit(1)
+if __name__ == "__main__":
+    main()
