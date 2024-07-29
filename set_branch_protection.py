@@ -37,10 +37,10 @@ def get_repositories():
         sys.exit(1)
 
 def create_org_ruleset(repos):
-    """Create an organization-level ruleset with 'Require linear history' rule."""
+    """Create an organization-level ruleset with 'Restrict updates' rule."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
     
-    ruleset_name = f"Org Ruleset - Linear History - {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    ruleset_name = f"Org Ruleset - Restrict Updates - {datetime.now().strftime('%Y%m%d%H%M%S')}"
     
     ruleset_data = {
         "name": ruleset_name,
@@ -67,7 +67,9 @@ def create_org_ruleset(repos):
             {
                 "type": "update",
                 "parameters": {
-                    "update_allows_fetch_and_merge": False
+                    "update_type": "allow",
+                    "update_allows_fetch_and_merge": True,
+                    "required_approving_review_count": 0
                 }
             }
         ]
