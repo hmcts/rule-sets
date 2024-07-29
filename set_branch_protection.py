@@ -61,7 +61,8 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_linear_history",
+                "parameters": {}
             },
             {
                 "type": "required_pull_request_reviews",
@@ -108,7 +109,8 @@ def update_org_ruleset(ruleset_id, repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_linear_history",
+                "parameters": {}
             },
             {
                 "type": "required_pull_request_reviews",
