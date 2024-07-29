@@ -35,6 +35,16 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
+def get_existing_ruleset(name):
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        rulesets = response.json()
+        for ruleset in rulesets:
+            if ruleset['name'] == name:
+                return ruleset['id']
+    return None
+
 def create_org_ruleset(repos):
     """Create an organization-level ruleset and assign repositories to it using REST API."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
@@ -55,24 +65,18 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
-            },
-            {
+                            {
                 "type": "required_pull_request_reviews",
                 "parameters": {
                     "required_approving_review_count": 1
                 }
-            },
-            {
-                "type": "pull_request",
-                "parameters": {
-                    "required": True
-                }
+                            }
             }
+            
         ]
     }
     
-    print("Sending request to create ruleset with the following data:")
+    print("Sending request with the following data:")
     print(json.dumps(ruleset_data, indent=2))
     
     response = requests.post(url, headers=headers, json=ruleset_data)
@@ -81,7 +85,7 @@ def create_org_ruleset(repos):
     print(f"Response headers: {response.headers}")
     print(f"Response content: {response.text}")
     
-    if response.status_code in [200, 201]:
+    if response.status_code == 201:
         ruleset = response.json()
         print(f"Successfully created organization ruleset '{ruleset['name']}'")
         return ruleset['id']
@@ -98,7 +102,6 @@ def create_org_ruleset(repos):
         elif 'message' in error_data:
             print(f"Error message: {error_data['message']}")
         return None
-
 def main():
     try:
         repos = get_repositories()
