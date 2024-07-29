@@ -23,21 +23,8 @@ headers = {
     "Accept": "application/vnd.github.v3+json"
 }
 
-def get_repositories():
-    """Read repositories from production-repos.json file."""
-    try:
-        with open('production-repos.json', 'r') as f:
-            repos = json.load(f)
-        return repos
-    except FileNotFoundError:
-        print("Error: production-repos.json file not found")
-        sys.exit(1)
-    except json.JSONDecodeError:
-        print("Error: Invalid JSON in production-repos.json")
-        sys.exit(1)
-
 def create_org_ruleset(repos):
-    """Create an organization-level ruleset with 'Restrict updates' rule."""
+    """Create an organization-level ruleset to restrict updates."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
     
     ruleset_name = f"Org Ruleset - Restrict Updates - {datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -65,11 +52,10 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "update",
+                "type": "creation",
                 "parameters": {
-                    "update_type": "allow",
-                    "update_allows_fetch_and_merge": True,
-                    "required_approving_review_count": 0
+                    "requires_signatures": True,
+                    "authorized_actor_only": True
                 }
             }
         ]
