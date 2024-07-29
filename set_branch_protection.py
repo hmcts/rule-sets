@@ -111,8 +111,8 @@ def update_org_ruleset(ruleset_id, repos):
                 "type": "required_reviews",
                 "parameters": {
                     "required_approving_review_count": 1,
-                    "dismiss_stale_reviews": True,
-                    "require_code_owner_reviews": True
+                    "requires_approval": True,
+                    "requires_code_owner_review": True
                 }
             }
         ]
