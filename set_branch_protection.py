@@ -113,7 +113,7 @@ def update_org_ruleset(ruleset_id, repos):
             {
                 "type": "required_pull_request_reviews",
                 "parameters": {
-                    "required_approving_review_count": 1
+                    "required_approving_review_count": 2
                 }
             }
         ]
