@@ -115,12 +115,16 @@ try:
                 }
             ]
         }
+        print("Creating New Ruleset with data:")
+        print(json.dumps(new_ruleset_data, indent=4))
+
         created_ruleset = create_ruleset(ORGANIZATION, new_ruleset_data)
         print("Created New Ruleset:")
         print(json.dumps(created_ruleset, indent=4))
 
 except requests.exceptions.HTTPError as http_err:
     print(f"HTTP error occurred: {http_err}")
+    print(f"Response content: {http_err.response.content.decode()}")
     sys.exit(1)
 except Exception as err:
     print(f"An error occurred: {err}")
