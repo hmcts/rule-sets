@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - update-file-path
   workflow_dispatch:
 
 env:
