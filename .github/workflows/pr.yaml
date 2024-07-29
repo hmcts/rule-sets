@@ -40,3 +40,4 @@ jobs:
           echo "Running set_branch_protection.py"
           python set_branch_protection.py
           echo "Script execution completed"
+          
