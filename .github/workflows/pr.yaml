@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - updated-file-path
 
 env:
   TF_LOG: INFO
@@ -21,10 +22,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Debug Info
+      run: |
+        echo "GitHub ref: ${{ github.ref }}"
+        echo "Event name: ${{ github.event_name }}"
+        echo "Repository: ${{ github.repository }}"
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
     
-    # Log into Azure with OIDC integration  
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
@@ -35,7 +41,6 @@ jobs:
     - name: Install jq
       run: sudo apt-get install jq -y
     
-    # List all the repos and branches that the rules are going to be applied on
     - name: List Repositories and Branches
       run: |
           echo "Checking Repositories and Branches"
@@ -54,40 +59,20 @@ jobs:
             done
           done
 
-    - name: Terraform Init
-      working-directory: components
-      env:
-        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
-        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-    - name: Terraform format
-      working-directory: components
-      id: fmt
-      run: terraform fmt -check
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
 
-    - name: Terraform validate
-      working-directory: components
-      id: validate
+    - name: Create Organization Ruleset
       env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform validate
-
-    - name: Terraform plan
-      working-directory: components
-      id: plan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: terraform plan -var="github_token=${{ secrets.PAT_TOKEN }}"
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        echo "Running set_branch_protection.py"
+        python set_branch_protection.py ${{ secrets.PAT_TOKEN }}
+        echo "Script execution completed"
