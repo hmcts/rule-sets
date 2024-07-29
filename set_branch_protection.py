@@ -19,15 +19,16 @@ print(f"Using token: {GITHUB_TOKEN[:4]}...{GITHUB_TOKEN[-4:]}")
 # Headers for GitHub API requests
 headers = {
     "Authorization": f"token {GITHUB_TOKEN}",
-    "Accept": "application/vnd.github.v3+json"
+    "Accept": "application/vnd.github+json",
+    "Content-Type": "application/json"
 }
 
-def get_repositories():
+def load_repositories(file_path):
     """Read repositories from production-repos.json file."""
     try:
-        with open('production-repos.json', 'r') as f:
-            repos = json.load(f)
-        return repos
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        return data['repositories']
     except FileNotFoundError:
         print("Error: production-repos.json file not found")
         sys.exit(1)
@@ -45,52 +46,75 @@ def get_existing_ruleset(name):
                 return ruleset['id']
     return None
 
-def create_org_ruleset(repos):
-    """Create an organization-level ruleset and assign repositories to it using REST API."""
-    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+def get_ruleset(org, ruleset_id):
+    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+def create_or_update_org_ruleset(repos):
+    """Create or update an organization-level ruleset and assign repositories to it using REST API."""
+    ruleset_name = "Default Organization Ruleset"
+    existing_ruleset_id = get_existing_ruleset(ruleset_name)
     
-    ruleset_data = {
-        "name": "Default Organization Ruleset",
-        "target": "branch",
-        "enforcement": "active",
-        "conditions": {
-            "ref_name": {
-                "include": ["refs/heads/main", "refs/heads/master"],
-                "exclude": []
-            },
-            "repository_name": {
-                "include": repos,
-                "exclude": []
-            }
-        },
-        "rules": [
-            {
-                "type": "required_linear_history"
-            },
-            {
-                "type": "required_pull_request_reviews",
-                "parameters": {
-                    "required_approving_review_count": 1
+    if existing_ruleset_id:
+        ruleset = get_ruleset(ORG_NAME, existing_ruleset_id)
+        ruleset["conditions"]["repository_name"]["include"] = repos
+        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{existing_ruleset_id}"
+        method = requests.patch
+        action = "Updated"
+    else:
+        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+        ruleset = {
+            "name": ruleset_name,
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+                "ref_name": {
+                    "include": ["refs/heads/main", "refs/heads/master"],
+                    "exclude": []
+                },
+                "repository_name": {
+                    "include": repos,
+                    "exclude": []
                 }
-            }
-        ]
-    }
+            },
+            "rules": [
+                {
+                    "type": "required_linear_history"
+                },
+                {
+                    "type": "required_pull_request_reviews",
+                    "parameters": {
+                        "required_approving_review_count": 1
+                    }
+                },
+                {
+                    "type": "required_pull_request",
+                    "parameters": {
+                        "required": True
+                    }
+                }
+            ]
+        }
+        method = requests.post
+        action = "Created"
     
-    print("Sending request with the following data:")
-    print(json.dumps(ruleset_data, indent=2))
+    print(f"Sending request to {action.lower()} ruleset with the following data:")
+    print(json.dumps(ruleset, indent=2))
     
-    response = requests.post(url, headers=headers, json=ruleset_data)
+    response = method(url, headers=headers, data=json.dumps(ruleset))
     
     print(f"Response status code: {response.status_code}")
     print(f"Response headers: {response.headers}")
     print(f"Response content: {response.text}")
     
-    if response.status_code == 201:
+    if response.status_code in [200, 201]:
         ruleset = response.json()
-        print(f"Successfully created organization ruleset '{ruleset['name']}'")
+        print(f"Successfully {action.lower()} organization ruleset '{ruleset['name']}'")
         return ruleset['id']
     else:
-        print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
+        print(f"Failed to {action.lower()} organization ruleset: {response.status_code} - {response.text}")
         error_data = response.json()
         if 'errors' in error_data and isinstance(error_data['errors'], list):
             for error in error_data['errors']:
@@ -105,13 +129,13 @@ def create_org_ruleset(repos):
 
 def main():
     try:
-        repos = get_repositories()
+        repos = load_repositories('../production_repos.json')
         print(f"Found {len(repos)} repositories in production-repos.json")
-        ruleset_id = create_org_ruleset(repos)
+        ruleset_id = create_or_update_org_ruleset(repos)
         if ruleset_id:
-            print(f"Ruleset created with ID: {ruleset_id}")
+            print(f"Ruleset created or updated with ID: {ruleset_id}")
         else:
-            print("Failed to create ruleset")
+            print("Failed to create or update ruleset")
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
