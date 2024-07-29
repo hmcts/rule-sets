@@ -108,14 +108,7 @@ def update_org_ruleset(ruleset_id, repos):
         },
         "rules": [
             {
-                "type": "required_status_checks",
-                "parameters": {
-                    "strict": True,
-                    "contexts": []
-                }
-            },
-            {
-                "type": "required_pull_request_reviews",
+                "type": "required_reviews",
                 "parameters": {
                     "required_approving_review_count": 1,
                     "dismiss_stale_reviews": True,
