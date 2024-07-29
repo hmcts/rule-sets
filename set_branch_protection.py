@@ -45,31 +45,14 @@ def get_existing_ruleset(name):
                 return ruleset['id']
     return None
 
-def create_or_update_org_ruleset(repos):
-    """Create or update an organization-level ruleset and assign repositories to it using REST API."""
-    ruleset_name = "Default Organization Ruleset"
-    existing_ruleset_id = get_existing_ruleset(ruleset_name)
-    
+def create_org_ruleset(repos):
+    """Create an organization-level ruleset and assign repositories to it using REST API."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    method = requests.post
-    action = "Created"
-
-    if existing_ruleset_id:
-        url = f"{url}/{existing_ruleset_id}"
-        method = requests.put
-        action = "Updated"
     
     ruleset_data = {
-        "name": ruleset_name,
+        "name": "Default Organization Ruleset",
         "target": "branch",
         "enforcement": "active",
-        "bypass_actors": [
-            {
-                "actor_id": 1,
-                "actor_type": "OrganizationAdmin",
-                "bypass_mode": "always"
-            }
-        ],
         "conditions": {
             "ref_name": {
                 "include": ["refs/heads/main", "refs/heads/master"],
@@ -82,46 +65,26 @@ def create_or_update_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history",
-                "parameters": {}
-            },
-            {
-                "type": "required_pull_request_reviews",
-                "parameters": {
-                    "required_approving_review_count": 1,
-                    "require_code_owner_review": False,
-                    "dismiss_stale_reviews_on_push": True
-                }
-            },
-            {
-                "type": "required_status_checks",
-                "parameters": {
-                    "strict": True,
-                    "contexts": []
-                }
-            },
-            {
-                "type": "required_signatures",
-                "parameters": {}
+                "type": "required_linear_history"
             }
         ]
     }
     
-    print(f"Sending request to {action.lower()} ruleset with the following data:")
+    print("Sending request with the following data:")
     print(json.dumps(ruleset_data, indent=2))
     
-    response = method(url, headers=headers, json=ruleset_data)
+    response = requests.post(url, headers=headers, json=ruleset_data)
     
     print(f"Response status code: {response.status_code}")
     print(f"Response headers: {response.headers}")
     print(f"Response content: {response.text}")
     
-    if response.status_code in [200, 201]:
+    if response.status_code == 201:
         ruleset = response.json()
-        print(f"Successfully {action.lower()} organization ruleset '{ruleset['name']}'")
+        print(f"Successfully created organization ruleset '{ruleset['name']}'")
         return ruleset['id']
     else:
-        print(f"Failed to {action.lower()} organization ruleset: {response.status_code} - {response.text}")
+        print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
         error_data = response.json()
         if 'errors' in error_data and isinstance(error_data['errors'], list):
             for error in error_data['errors']:
@@ -133,16 +96,15 @@ def create_or_update_org_ruleset(repos):
         elif 'message' in error_data:
             print(f"Error message: {error_data['message']}")
         return None
-
 def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
-        ruleset_id = create_or_update_org_ruleset(repos)
+        ruleset_id = create_org_ruleset(repos)
         if ruleset_id:
-            print(f"Ruleset created or updated with ID: {ruleset_id}")
+            print(f"Ruleset created with ID: {ruleset_id}")
         else:
-            print("Failed to create or update ruleset")
+            print("Failed to create ruleset")
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
