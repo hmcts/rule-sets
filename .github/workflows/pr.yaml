@@ -5,7 +5,8 @@ on:
     branches:
       - master
       - updated-file-path
-
+  workflow_dispatch:
+    
 env:
   TF_LOG: INFO
 
