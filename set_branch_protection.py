@@ -67,18 +67,6 @@ def create_org_ruleset(repos):
             {
                 "type": "required_linear_history"
             },
-            {
-                "type": "required_pull_request_reviews",
-                "parameters": {
-                    "required_approving_review_count": 1
-                }
-            },
-            {
-                "type": "required_pull_request",
-                "parameters": {
-                    "required": True
-                }
-            }
         ]
     }
     
