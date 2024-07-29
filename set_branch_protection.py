@@ -13,17 +13,14 @@ if not GITHUB_TOKEN:
     print("Error: PAT_TOKEN not found in environment variables or command line arguments")
     sys.exit(1)
 
-# Print masked token for debugging
 print(f"Using token: {GITHUB_TOKEN[:4]}...{GITHUB_TOKEN[-4:]}")
 
-# Headers for GitHub API requests
 headers = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
 }
 
 def get_repositories():
-    """Read repositories from production-repos.json file."""
     try:
         with open('production-repos.json', 'r') as f:
             repos = json.load(f)
@@ -35,43 +32,65 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
-def update_branch_protection(repo, branch):
-    """Update branch protection for a specific repository and branch."""
-    url = f"https://api.github.com/repos/{ORG_NAME}/{repo}/branches/{branch}/protection"
+def create_org_ruleset(repos):
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
     
-    protection_data = {
-        "required_status_checks": None,
-        "enforce_admins": True,
-        "required_pull_request_reviews": {
-            "dismiss_stale_reviews": True,
-            "require_code_owner_reviews": False,
-            "required_approving_review_count": 1
+    ruleset_data = {
+        "name": "Organization-wide Branch Protection Rules",
+        "target": "branch",
+        "enforcement": "active",
+        "conditions": {
+            "ref_name": {
+                "include": ["refs/heads/main", "refs/heads/master"],
+                "exclude": []
+            },
+            "repository_name": {
+                "include": repos,
+                "exclude": []
+            }
         },
-        "restrictions": None,
-        "required_linear_history": True,
-        "allow_force_pushes": False,
-        "allow_deletions": False
+        "rules": [
+            {
+                "type": "required_linear_history"
+            },
+            {
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "required_approving_review_count": 1,
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": False,
+                    "require_last_push_approval": True,
+                    "required_review_thread_resolution": True
+                }
+            }
+        ]
     }
     
-    print(f"Updating branch protection for {repo}/{branch}")
-    response = requests.put(url, headers=headers, json=protection_data)
+    print("Creating organization ruleset with the following data:")
+    print(json.dumps(ruleset_data, indent=2))
+    
+    response = requests.post(url, headers=headers, json=ruleset_data)
     
     print(f"Response status code: {response.status_code}")
     print(f"Response content: {response.text}")
     
-    if response.status_code in [200, 201]:
-        print(f"Successfully updated branch protection for {repo}/{branch}")
+    if response.status_code in [201, 200]:
+        print("Successfully created organization ruleset")
+        return response.json().get('id')
     else:
-        print(f"Failed to update branch protection for {repo}/{branch}: {response.status_code} - {response.text}")
+        print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
+        return None
 
 def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
         
-        for repo in repos:
-            for branch in ['main', 'master']:
-                update_branch_protection(repo, branch)
+        ruleset_id = create_org_ruleset(repos)
+        if ruleset_id:
+            print(f"Ruleset created with ID: {ruleset_id}")
+        else:
+            print("Failed to create ruleset")
         
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
