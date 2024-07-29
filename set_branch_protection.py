@@ -56,7 +56,7 @@ def create_or_update_org_ruleset(repos):
 
     if existing_ruleset_id:
         url = f"{url}/{existing_ruleset_id}"
-        method = requests.patch
+        method = requests.put
         action = "Updated"
     
     ruleset_data = {
