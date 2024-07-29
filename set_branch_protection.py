@@ -61,7 +61,27 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict": True,
+                    "contexts": ["continuous-integration/travis-ci"]
+                }
+            },
+            {
+                "type": "enforce_admins"
+            },
+            {
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": True,
+                    "required_approving_review_count": 2,
+                    "require_last_push_approval": True,
+                    "bypass_pull_request_allowances": {
+                        "users": ["octocat"],
+                        "teams": ["justice-league"]
+                    }
+                }
             }
         ]
     }
@@ -100,7 +120,27 @@ def update_org_ruleset(ruleset_id, repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict": True,
+                    "contexts": ["continuous-integration/travis-ci"]
+                }
+            },
+            {
+                "type": "enforce_admins"
+            },
+            {
+                "type": "required_pull_request_reviews",
+                "parameters": {
+                    "dismiss_stale_reviews": True,
+                    "require_code_owner_reviews": True,
+                    "required_approving_review_count": 2,
+                    "require_last_push_approval": True,
+                    "bypass_pull_request_allowances": {
+                        "users": ["octocat"],
+                        "teams": ["justice-league"]
+                    }
+                }
             }
         ]
     }
