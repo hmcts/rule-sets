@@ -49,11 +49,11 @@ def create_org_ruleset(repos):
                 "exclude": []
             }
         },
-        # "rules": [
-        #     {
-        #         "type": "required_linear_history"
-        #     }
-        # ]
+        "rules": [
+            {
+                "type": "required_linear_history"
+            }
+        ]
     }
     
     print("Creating organization ruleset with the following data:")
@@ -91,4 +91,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
