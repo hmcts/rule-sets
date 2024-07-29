@@ -7,7 +7,7 @@ import sys
 GITHUB_TOKEN = os.getenv('PAT_TOKEN')
 ORGANIZATION = 'hmcts-test'
 REPO_NAME = 'github-repository-rules'
-BRANCH_NAME = 'main'
+BRANCH_NAME = 'master'
 REPO_FILE = 'production-repos.json'
 
 if not GITHUB_TOKEN:
