@@ -22,16 +22,6 @@ headers = {
     "Accept": "application/vnd.github.v3+json"
 }
 
-def get_existing_ruleset(name):
-    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        rulesets = response.json()
-        for ruleset in rulesets:
-            if ruleset['name'] == name:
-                return ruleset['id']
-    return None
-
 def get_repositories():
     """Read repositories from production-repos.json file."""
     try:
@@ -45,19 +35,24 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
+def get_existing_ruleset(name):
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        rulesets = response.json()
+        for ruleset in rulesets:
+            if ruleset['name'] == name:
+                return ruleset['id']
+    return None
+
 def create_or_update_org_ruleset(repos):
     """Create or update an organization-level ruleset and assign repositories to it using REST API."""
     ruleset_name = "Default Organization Ruleset"
     existing_ruleset_id = get_existing_ruleset(ruleset_name)
     
-    if existing_ruleset_id:
-        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{existing_ruleset_id}"
-        method = requests.patch
-        action = "Updated"
-    else:
-        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-        method = requests.post
-        action = "Created"
+    url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+    method = requests.post
+    action = "Created"
     
     ruleset_data = {
         "name": ruleset_name,
