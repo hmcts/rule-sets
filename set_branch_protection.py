@@ -76,7 +76,6 @@ def create_org_ruleset(repos):
     response = requests.post(url, headers=headers, json=ruleset_data)
     
     print(f"Response status code: {response.status_code}")
-    print(f"Response headers: {response.headers}")
     print(f"Response content: {response.text}")
     
     if response.status_code == 201:
@@ -85,27 +84,40 @@ def create_org_ruleset(repos):
         return ruleset['id']
     else:
         print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
-        error_data = response.json()
-        if 'errors' in error_data and isinstance(error_data['errors'], list):
-            for error in error_data['errors']:
-                if isinstance(error, dict):
-                    print(f"Error: {error.get('message', 'Unknown error')}")
-                    print(f"Location: {error.get('resource', 'Unknown')} - {error.get('field', 'Unknown')}")
-                else:
-                    print(f"Error: {error}")
-        elif 'message' in error_data:
-            print(f"Error message: {error_data['message']}")
         return None
+
+def set_branch_protection(repo, branch):
+    """Set branch protection rules for a specific repository and branch."""
+    url = f"https://api.github.com/repos/{ORG_NAME}/{repo}/branches/{branch}/protection"
+    
+    protection_data = {
+        "required_linear_history": True,
+        "allow_force_pushes": False,
+        "allow_deletions": False
+    }
+    
+    response = requests.put(url, headers=headers, json=protection_data)
+    
+    if response.status_code in [200, 201]:
+        print(f"Successfully set branch protection for {repo}/{branch}")
+    else:
+        print(f"Failed to set branch protection for {repo}/{branch}: {response.status_code} - {response.text}")
 
 def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
+        
         ruleset_id = create_org_ruleset(repos)
         if ruleset_id:
             print(f"Ruleset created with ID: {ruleset_id}")
         else:
             print("Failed to create ruleset")
+        
+        for repo in repos:
+            for branch in ['main', 'master']:
+                set_branch_protection(repo, branch)
+        
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
