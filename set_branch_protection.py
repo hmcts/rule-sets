@@ -37,10 +37,10 @@ def get_repositories():
         sys.exit(1)
 
 def create_org_ruleset(repos):
-    """Create an organization-level ruleset and assign repositories to it using REST API."""
+    """Create an organization-level ruleset with 'Require linear history' rule."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
     
-    ruleset_name = f"Organization Ruleset - {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    ruleset_name = f"Org Ruleset - Linear History - {datetime.now().strftime('%Y%m%d%H%M%S')}"
     
     ruleset_data = {
         "name": ruleset_name,
@@ -65,7 +65,10 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_linear_history",
+                "parameters": {
+                    "required": True
+                }
             }
         ]
     }
@@ -86,23 +89,6 @@ def create_org_ruleset(repos):
         print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
         return None
 
-def set_branch_protection(repo, branch):
-    """Set branch protection rules for a specific repository and branch."""
-    url = f"https://api.github.com/repos/{ORG_NAME}/{repo}/branches/{branch}/protection"
-    
-    protection_data = {
-        "required_linear_history": True,
-        "allow_force_pushes": False,
-        "allow_deletions": False
-    }
-    
-    response = requests.put(url, headers=headers, json=protection_data)
-    
-    if response.status_code in [200, 201]:
-        print(f"Successfully set branch protection for {repo}/{branch}")
-    else:
-        print(f"Failed to set branch protection for {repo}/{branch}: {response.status_code} - {response.text}")
-
 def main():
     try:
         repos = get_repositories()
@@ -113,10 +99,6 @@ def main():
             print(f"Ruleset created with ID: {ruleset_id}")
         else:
             print("Failed to create ruleset")
-        
-        for repo in repos:
-            for branch in ['main', 'master']:
-                set_branch_protection(repo, branch)
         
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
