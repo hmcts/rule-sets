@@ -105,17 +105,7 @@ def update_org_ruleset(ruleset_id, repos):
                 "include": repos,
                 "exclude": []
             }
-        },
-        "rules": [
-            {
-                "type": "required_reviews",
-                "parameters": {
-                    "required_approving_review_count": 1,
-                    "requires_approval": True,
-                    "requires_code_owner_review": True
-                }
-            }
-        ]
+        }
     }
     
     print("Updating organization ruleset with the following data:")
