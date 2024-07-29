@@ -59,15 +59,6 @@ def create_org_ruleset(repos):
                 "parameters": {
                     "allow_deletions": False
                 }
-            },
-            {
-                "type": "required_pull_request_reviews",
-                "parameters": {
-                    "dismiss_stale_reviews": True,
-                    "require_code_owner_reviews": False,
-                    "required_approving_review_count": 1,
-                    "require_last_push_approval": True
-                }
             }
         ]
     }
@@ -99,13 +90,6 @@ def main():
     try:
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
-        
-        existing_ruleset_id = check_existing_ruleset()
-        if existing_ruleset_id:
-            print(f"A ruleset with the name 'Default Organization Ruleset' already exists with ID: {existing_ruleset_id}")
-            print("Please delete or rename the existing ruleset before creating a new one.")
-            sys.exit(1)
-        
         ruleset_id = create_org_ruleset(repos)
         if ruleset_id:
             print(f"Ruleset created with ID: {ruleset_id}")
