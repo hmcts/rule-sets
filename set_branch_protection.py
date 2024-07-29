@@ -36,11 +36,27 @@ def get_repositories():
         print("Error: Invalid JSON in production-repos.json")
         sys.exit(1)
 
-def create_org_ruleset(repos):
-    """Create an organization-level ruleset to restrict updates."""
+def get_existing_ruleset():
+    """Check for existing ruleset and return its ID if found."""
     url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
-    
-    ruleset_name = f"Org Ruleset - Restrict Updates - {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        rulesets = response.json()
+        for ruleset in rulesets:
+            if ruleset['name'].startswith("Org Ruleset - Branch Protection"):
+                return ruleset['id']
+    return None
+
+def create_or_update_org_ruleset(repos, existing_ruleset_id=None):
+    """Create or update an organization-level ruleset for branch protection."""
+    if existing_ruleset_id:
+        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets/{existing_ruleset_id}"
+        method = requests.patch
+    else:
+        url = f"https://api.github.com/orgs/{ORG_NAME}/rulesets"
+        method = requests.post
+
+    ruleset_name = "Org Ruleset - Branch Protection"
     
     ruleset_data = {
         "name": ruleset_name,
@@ -65,30 +81,33 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                "type": "update",
+                "type": "branch_name_pattern",
                 "parameters": {
-                    "restrict_push": True,
-                    "restrict_force_push": True,
-                    "restrict_deletions": True
+                    "name": "main",
+                    "negate": False
                 }
+            },
+            {
+                "type": "non_fast_forward",
+                "parameters": {}
             }
         ]
     }
     
-    print(f"Sending request to create ruleset with the following data:")
+    print(f"Sending request to {'update' if existing_ruleset_id else 'create'} ruleset with the following data:")
     print(json.dumps(ruleset_data, indent=2))
     
-    response = requests.post(url, headers=headers, json=ruleset_data)
+    response = method(url, headers=headers, json=ruleset_data)
     
     print(f"Response status code: {response.status_code}")
     print(f"Response content: {response.text}")
     
-    if response.status_code == 201:
+    if response.status_code in [200, 201]:
         ruleset = response.json()
-        print(f"Successfully created organization ruleset '{ruleset['name']}'")
+        print(f"Successfully {'updated' if existing_ruleset_id else 'created'} organization ruleset '{ruleset['name']}'")
         return ruleset['id']
     else:
-        print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
+        print(f"Failed to {'update' if existing_ruleset_id else 'create'} organization ruleset: {response.status_code} - {response.text}")
         return None
 
 def main():
@@ -96,11 +115,15 @@ def main():
         repos = get_repositories()
         print(f"Found {len(repos)} repositories in production-repos.json")
         
-        ruleset_id = create_org_ruleset(repos)
+        existing_ruleset_id = get_existing_ruleset()
+        if existing_ruleset_id:
+            print(f"Found existing ruleset with ID: {existing_ruleset_id}")
+        
+        ruleset_id = create_or_update_org_ruleset(repos, existing_ruleset_id)
         if ruleset_id:
-            print(f"Ruleset created with ID: {ruleset_id}")
+            print(f"Ruleset {'updated' if existing_ruleset_id else 'created'} with ID: {ruleset_id}")
         else:
-            print("Failed to create ruleset")
+            print("Failed to create or update ruleset")
         
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
