@@ -49,21 +49,11 @@ def create_org_ruleset(repos):
                 "exclude": []
             }
         },
-        "rules": [
-            {
-                "type": "required_linear_history"
-            },
-            {
-                "type": "pull_request",
-                "parameters": {
-                    "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_review": False,
-                    "required_approving_review_count": 2,
-                    "require_last_push_approval": True,
-                    "required_review_thread_resolution": True
-                }
-            }
-        ]
+        # "rules": [
+        #     {
+        #         "type": "required_linear_history"
+        #     }
+        # ]
     }
     
     print("Creating organization ruleset with the following data:")
