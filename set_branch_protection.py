@@ -108,9 +108,10 @@ try:
                     }
                 },
                 {
-                    "type": "required_pull_request",
+                    "type": "required_status_checks",
                     "parameters": {
-                        "required": True
+                        "strict": True,
+                        "contexts": []
                     }
                 }
             ]
