@@ -57,7 +57,7 @@ def create_ruleset(org, data):
 # Function to update the existing ruleset
 def update_ruleset(org, ruleset_id, data):
     url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
-    response = requests.patch(url, headers=headers, data=json.dumps(data))
+    response = requests.put(url, headers=headers, data=json.dumps(data))
     response.raise_for_status()
     return response.json()
 
@@ -70,18 +70,25 @@ try:
     ruleset_id = get_existing_ruleset(ORGANIZATION, RULESET_NAME)
     if ruleset_id:
         # Get the current ruleset data
-        ruleset = get_ruleset(ORGANIZATION, ruleset_id)
-        print("Current Ruleset:")
-        print(json.dumps(ruleset, indent=4))
+        try:
+            ruleset = get_ruleset(ORGANIZATION, ruleset_id)
+            print("Current Ruleset:")
+            print(json.dumps(ruleset, indent=4))
 
-        # Update the repository_name condition
-        ruleset['conditions']['repository_name']['include'] = target_repositories
+            # Update the repository_name condition
+            ruleset['conditions']['repository_name']['include'] = target_repositories
 
-        # Update the ruleset on GitHub
-        updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, ruleset)
-        print("Updated Ruleset:")
-        print(json.dumps(updated_ruleset, indent=4))
-    else:
+            # Update the ruleset on GitHub
+            updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, ruleset)
+            print("Updated Ruleset:")
+            print(json.dumps(updated_ruleset, indent=4))
+        except requests.exceptions.HTTPError as http_err:
+            if http_err.response.status_code == 404:
+                print(f"Ruleset with ID {ruleset_id} not found. Creating a new ruleset.")
+                ruleset_id = None
+            else:
+                raise
+    if not ruleset_id:
         # Create a new ruleset
         new_ruleset_data = {
             "name": RULESET_NAME,
