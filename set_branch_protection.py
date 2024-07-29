@@ -40,6 +40,13 @@ def get_existing_ruleset(org, ruleset_name):
             return ruleset['id']
     return None
 
+# Function to get the current ruleset by ID
+def get_ruleset(org, ruleset_id):
+    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
 # Function to create a new ruleset
 def create_ruleset(org, data):
     url = f'https://api.github.com/orgs/{org}/rulesets'
