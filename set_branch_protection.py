@@ -66,7 +66,7 @@ def create_org_ruleset(repos):
         "rules": [
             {
                 "type": "required_linear_history"
-            },
+            }
         ]
     }
     
