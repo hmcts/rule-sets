@@ -4,13 +4,13 @@ import os
 import sys
 
 # Configuration
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+GITHUB_TOKEN = os.getenv('PAT_TOKEN')
 ORGANIZATION = 'hmcts-test'
 RULESET_ID = '1239224'
 REPO_FILE = 'production-repos.json'
 
 if not GITHUB_TOKEN:
-    print("Error: GITHUB_TOKEN not found in environment variables.")
+    print("Error: PAT_TOKEN not found in environment variables.")
     sys.exit(1)
 
 # Headers for authentication

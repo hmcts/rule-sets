@@ -20,7 +20,6 @@ permissions:
   issues: write
   pull-requests: write
   contents: read
-  
 
 jobs: 
   pr-infra-check:
@@ -45,29 +44,26 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
-
-  
-    
     - name: Install jq
       run: sudo apt-get install jq -y
     
     - name: List Repositories and Branches
       run: |
-          echo "Checking Repositories and Branches"
-          cat ./production-repos.json
-          for repo in $(jq -r '.[]' ./production-repos.json); do
-            echo "Checking repository: $repo"
+        echo "Checking Repositories and Branches"
+        cat ./production-repos.json
+        for repo in $(jq -r '.[]' ./production-repos.json); do
+          echo "Checking repository: $repo"
+          curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/hmcts/$repo
+
+          for branch in main master; do
+            echo "Checking branch: $branch in repository: $repo"
             curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
                  -H "Accept: application/vnd.github.v3+json" \
-                 https://api.github.com/repos/hmcts/$repo
-    
-            for branch in main master; do
-              echo "Checking branch: $branch in repository: $repo"
-              curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-                   -H "Accept: application/vnd.github.v3+json" \
-                   https://api.github.com/repos/hmcts/$repo/branches/$branch
-            done
+                 https://api.github.com/repos/hmcts/$repo/branches/$branch
           done
+        done
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -84,7 +80,5 @@ jobs:
         PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         echo "Running set_branch_protection.py"
-        python set_branch_protection.py ${{ secrets.PAT_TOKEN }}
+        python set_branch_protection.py
         echo "Script execution completed"
-
-        
