@@ -68,6 +68,7 @@ def create_org_ruleset(repos):
             {
                 "type": "deletion",
                 "parameters": {
+                    "allow_force_pushes": False,
                     "allow_deletions": False
                 }
             },
@@ -75,9 +76,19 @@ def create_org_ruleset(repos):
                 "type": "pull_request",
                 "parameters": {
                     "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_reviews": False,
+                    "require_code_owner_review": False,
                     "required_approving_review_count": 1,
-                    "required_review_thread_resolution": True
+                    "require_last_push_approval": True
+                }
+            },
+            {
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict_required_status_checks_policy": True,
+                    "required_status_checks": [
+                        {"context": "ci/test"},
+                        {"context": "security/scan"}
+                    ]
                 }
             }
         ]
@@ -98,6 +109,13 @@ def create_org_ruleset(repos):
         return ruleset['id']
     else:
         print(f"Failed to create organization ruleset: {response.status_code} - {response.text}")
+        # Additional error handling
+        if response.status_code == 422:
+            error_data = response.json()
+            if 'errors' in error_data:
+                for error in error_data['errors']:
+                    print(f"Error: {error.get('message', 'Unknown error')}")
+                    print(f"Location: {error.get('resource', 'Unknown')} - {error.get('field', 'Unknown')}")
         return None
 
 def main():
