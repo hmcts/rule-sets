@@ -108,7 +108,11 @@ def update_org_ruleset(ruleset_id, repos):
         },
         "rules": [
             {
-                "type": "required_linear_history"
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict": True,
+                    "contexts": []
+                }
             },
             {
                 "type": "required_pull_request_reviews",
