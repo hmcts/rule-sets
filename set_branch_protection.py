@@ -111,7 +111,7 @@ try:
                     "type": "required_status_checks",
                     "parameters": {
                         "strict": True,
-                        "contexts": []  # Add specific status checks if needed
+                        "contexts": []
                     }
                 }
             ]
