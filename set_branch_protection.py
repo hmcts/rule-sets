@@ -65,14 +65,20 @@ def create_org_ruleset(repos):
         },
         "rules": [
             {
-                            {
+                "type": "required_linear_history"
+            },
+            {
                 "type": "required_pull_request_reviews",
                 "parameters": {
                     "required_approving_review_count": 1
                 }
-                            }
+            },
+            {
+                "type": "required_pull_request",
+                "parameters": {
+                    "required": True
+                }
             }
-            
         ]
     }
     
@@ -102,6 +108,7 @@ def create_org_ruleset(repos):
         elif 'message' in error_data:
             print(f"Error message: {error_data['message']}")
         return None
+
 def main():
     try:
         repos = get_repositories()
