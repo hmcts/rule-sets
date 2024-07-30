@@ -1,109 +1,207 @@
 import requests
-import os
-import sys
 import json
+import os
 
-# GitHub organization name
-ORG_NAME = "hmcts-test"
+# Configuration
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+ORGANIZATION = 'hmcts-test'
+RULESET_NAME = 'test-ruleset'
+REPO_FILE = '../production-repos.json'
 
-# GitHub PAT Token (Personal Access Token)
-GITHUB_TOKEN = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PAT_TOKEN")
-
-# Check if the PAT token is available, else exit
-if not GITHUB_TOKEN:
-    print("Error: PAT_TOKEN not found in environment variables or command line arguments")
-    sys.exit(1)
-
-# Masked token print for debugging purposes
-print(f"Using token: {GITHUB_TOKEN[:4]}...{GITHUB_TOKEN[-4:]}")
-
-# Headers for GitHub API requests
+# Headers for authentication
 headers = {
-    "Authorization": f"token {GITHUB_TOKEN}",
-    "Accept": "application/vnd.github.v3+json"
+    'Authorization': f'Bearer {GITHUB_TOKEN}',
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json',
+    'X-GitHub-Api-Version': '2022-11-28'
 }
 
-def get_repositories():
-    """
-    Reads repositories from the production-repos.json file.
-    
-    Returns:
-        list: List of repository names.
-    """
+# Function to load repositories from JSON file
+def load_repositories(file_path):
     try:
-        with open('production-repos.json', 'r') as f:
-            repos = json.load(f)
-        return repos
-    except FileNotFoundError:
-        print("Error: production-repos.json file not found")
-        sys.exit(1)
-    except json.JSONDecodeError:
-        print("Error: Invalid JSON in production-repos.json")
-        sys.exit(1)
-
-def apply_branch_protection(org, repo, branch):
-    """
-    Applies branch protection rules to a specified branch of a repository.
-    
-    Args:
-        org (str): Organization name.
-        repo (str): Repository name.
-        branch (str): Branch name.
-    """
-    # URL for branch protection API
-    url = f"https://api.github.com/repos/{org}/{repo}/branches/{branch}/protection"
-    
-    # Branch protection rules
-    protection_data = {
-        "required_status_checks": {
-            "strict": True,
-            "contexts": []
-        },
-        "enforce_admins": True,
-        "required_pull_request_reviews": {
-            "dismiss_stale_reviews": True,
-            "require_code_owner_reviews": True,
-            "required_approving_review_count": 1
-        },
-        "restrictions": None,
-        "required_linear_history": True
-    }
-    
-    # Sending the PUT request to apply branch protection
-    response = requests.put(url, headers=headers, json=protection_data)
-    
-    # Logging the response
-    print(f"Applying branch protection to {repo}/{branch}")
-    print(f"Response status code: {response.status_code}")
-    print(f"Response content: {response.text}")
-    
-    # Checking the response status
-    if response.status_code in [200, 201]:
-        print(f"Successfully applied branch protection to {repo}/{branch}")
-    else:
-        print(f"Failed to apply branch protection to {repo}/{branch}: {response.status_code} - {response.text}")
-
-def main():
-    """
-    Main function to apply branch protection rules to all repositories listed in production-repos.json.
-    """
-    try:
-        # Get the list of repositories
-        repos = get_repositories()
-        print(f"Found {len(repos)} repositories in production-repos.json")
-        
-        # Apply branch protection to both 'main' and 'master' branches for each repository
-        for repo in repos:
-            apply_branch_protection(ORG_NAME, repo, "main")
-            apply_branch_protection(ORG_NAME, repo, "master")
-        
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        if isinstance(data, list):
+            return data
+        else:
+            raise ValueError("JSON data should be a list of repositories")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        sys.exit(1)
+        print(f"Error loading repositories from {file_path}: {e}")
+        raise
 
-# Run the main function if the script is executed
-if __name__ == "__main__":
-    main()
+# Function to get the current ruleset by name
+def get_ruleset_by_name(org, ruleset_name):
+    url = f'https://api.github.com/orgs/{org}/rulesets'
+    print(f"Fetching rulesets from URL: {url}")
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        rulesets = response.json()
+        for ruleset in rulesets:
+            if ruleset['name'] == ruleset_name:
+                return ruleset
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching rulesets: {e}")
+        raise
+
+# Function to update the ruleset
+def update_ruleset(org, ruleset_id, data):
+    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
+    print(f"Updating ruleset at URL: {url}")
+    print(f"Request Headers: {headers}")
+    print(f"Request Data: {json.dumps(data, indent=4)}")
+    try:
+        response = requests.put(url, headers=headers, data=json.dumps(data))
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error updating ruleset: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
+        raise
+
+# Function to create a new ruleset
+def create_ruleset(org, data):
+    url = f'https://api.github.com/orgs/{org}/rulesets'
+    print(f"Creating ruleset at URL: {url}")
+    print(f"Request Headers: {headers}")
+    print(f"Request Data: {json.dumps(data, indent=4)}")
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error creating ruleset: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
+        raise
+
+# Main logic
+try:
+    # Load repositories from JSON file
+    target_repositories = load_repositories(REPO_FILE)
+
+    # Check if a ruleset with the same name already exists
+    matching_ruleset = get_ruleset_by_name(ORGANIZATION, RULESET_NAME)
+
+    bypass_actors = [
+        {
+            "actor_id": 4067333, 
+            "actor_type": "Team",
+            "bypass_mode": "always"
+        }
+    ]
+
+    ref_name_conditions = {
+        "exclude": [],
+        "include": [
+            "~DEFAULT_BRANCH",
+            "refs/heads/master",
+            "refs/heads/main"
+        ]
+    }
+
+    def ensure_branches_in_conditions(conditions, ref_name_conditions):
+        if 'ref_name' not in conditions:
+            conditions['ref_name'] = ref_name_conditions
+        else:
+            current_includes = set(conditions['ref_name'].get('include', []))
+            current_includes.update(ref_name_conditions['include'])
+            conditions['ref_name']['include'] = list(current_includes)
+            current_excludes = set(conditions['ref_name'].get('exclude', []))
+            current_excludes.update(ref_name_conditions['exclude'])
+            conditions['ref_name']['exclude'] = list(current_excludes)
+
+    if matching_ruleset:
+        # Ruleset with the same name exists, update it
+        ruleset_id = matching_ruleset['id']
+
+        # Ensure conditions exist in the ruleset
+        if 'conditions' not in matching_ruleset:
+            matching_ruleset['conditions'] = {}
+
+        # Check and update the repository_name condition
+        if 'repository_name' in matching_ruleset['conditions']:
+            matching_ruleset['conditions']['repository_name']['include'] = target_repositories
+            matching_ruleset['conditions']['repository_name']['protected'] = True
+        else:
+            print("'repository_name' not found in ruleset conditions, adding it.")
+            matching_ruleset['conditions']['repository_name'] = {
+                'include': target_repositories,
+                'exclude': [],
+                'protected': True
+            }
+
+        # Ensure the ref_name conditions include the necessary branches
+        ensure_branches_in_conditions(matching_ruleset['conditions'], ref_name_conditions)
+
+        # Enable enforcement
+        matching_ruleset['enforcement'] = 'active'
+
+        # Add or update bypass_actors
+        matching_ruleset['bypass_actors'] = bypass_actors
+
+        # Update the ruleset on GitHub
+        updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, matching_ruleset)
+
+        print("Updated Ruleset:")
+        print(json.dumps(updated_ruleset, indent=4))
+    else:
+        # No matching ruleset, create a new one
+        new_ruleset_data = {
+            "name": RULESET_NAME,
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+                "ref_name": ref_name_conditions,
+                "repository_name": {
+                    "include": target_repositories,
+                    "exclude": [],
+                    "protected": True
+                }
+            },
+            "rules": [
+                {
+                    "type": "deletion"
+                },
+                {
+                    "type": "non_fast_forward"
+                },
+                {
+                    "type": "pull_request",
+                    "parameters": {
+                        "required_approving_review_count": 1,
+                        "dismiss_stale_reviews_on_push": False,
+                        "require_code_owner_review": False,
+                        "require_last_push_approval": True,
+                        "required_review_thread_resolution": True
+                    }
+                },
+                {
+                    "type": "required_linear_history"
+                },
+                {
+                    "type": "required_status_checks",
+                    "parameters": {
+                        "strict_required_status_checks_policy": True,
+                        "do_not_enforce_on_create": False,
+                        "required_status_checks": [
+                            {
+                                "context": "ci/lint"
+                            },
+                            {
+                                "context": "ci/test"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "bypass_actors": bypass_actors
+        }
+        created_ruleset = create_ruleset(ORGANIZATION, new_ruleset_data)
+        print("Created New Ruleset:")
+        print(json.dumps(created_ruleset, indent=4))
+
+except Exception as e:
+    print(f"An error occurred: {e}")
