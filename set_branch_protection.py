@@ -72,14 +72,8 @@ def create_ruleset(org, data):
         print(f"Response content: {response.content}")
         raise
 
-def get_custom_properties(org):
-    url = f'https://api.github.com/orgs/{org}/properties/schema'
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
-
 def create_custom_property(org, property_name, property_data):
-    url = f'https://api.github.com/orgs/{org}/properties/schema'
+    url = f'https://api.github.com/orgs/{org}/custom_properties/schema'
     data = {
         "name": property_name,
         "type": property_data['type'],
@@ -88,15 +82,27 @@ def create_custom_property(org, property_name, property_data):
     }
     if property_data['type'] == 'single_select':
         data['allowed_values'] = property_data['allowed_values']
-    response = requests.post(url, headers=headers, json=data)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error creating custom property: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
+        raise
 
 def set_repo_custom_property(org, repo, properties):
-    url = f'https://api.github.com/repos/{org}/{repo}/properties/values'
-    response = requests.patch(url, headers=headers, json=properties)
-    response.raise_for_status()
-    return response.json()
+    url = f'https://api.github.com/repos/{org}/{repo}/custom_properties/values'
+    try:
+        response = requests.patch(url, headers=headers, json=properties)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error setting custom properties for {repo}: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
+        raise
 
 try:
     # Load repositories from JSON file
@@ -142,7 +148,7 @@ try:
 
     bypass_actors = [
         {
-            "actor_id": 4067333, 
+            "actor_id": 4067333,
             "actor_type": "Team",
             "bypass_mode": "always"
         }
