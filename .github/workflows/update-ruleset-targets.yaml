@@ -25,6 +25,6 @@ jobs:
 
       - name: Run script
         env:
-          OAUTH_TOKEN: ${{ secrets.OAUTH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
         run: |
           python scripts/update-ruleset-targets.py
