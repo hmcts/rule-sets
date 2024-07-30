@@ -96,6 +96,7 @@ try:
         "team": "default-team",
         "criticality": "low"
     }
+    
 
     # Set custom properties for each repository
     for repo in target_repositories:
@@ -225,3 +226,45 @@ try:
 
 except Exception as e:
     print(f"An error occurred: {e}")
+
+def create_custom_property(org, repo, property_name, property_data):
+    url = f'https://api.github.com/repos/{org}/{repo}/properties/schema'
+    data = {
+        "name": property_name,
+        "type": property_data['type'],
+        "required": property_data.get('required', False),
+        "description": property_data.get('description', '')
+    }
+    if property_data['type'] == 'single_select':
+        data['allowed_values'] = property_data['allowed_values']
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error creating custom property: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
+        raise
+
+
+# Define custom properties schema
+custom_properties_schema = {
+    "team": {
+        "type": "string",
+        "required": True,
+        "description": "The team responsible for this repository"
+    },
+    "criticality": {
+        "type": "single_select",
+        "required": True,
+        "description": "The criticality level of the repository",
+        "allowed_values": ["low", "medium", "high"]
+    }
+}
+
+# Create custom properties for each repository
+for repo in target_repositories:
+    for prop_name, prop_data in custom_properties_schema.items():
+        create_custom_property(ORGANIZATION, repo, prop_name, prop_data)
+        print(f"Created custom property {prop_name} for {repo}")
