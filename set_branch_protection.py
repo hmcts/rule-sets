@@ -172,7 +172,7 @@ try:
                 {
                     "type": "pull_request",
                     "parameters": {
-                        "required_approving_review_count": 1,
+                        "required_approving_review_count": 2,
                         "dismiss_stale_reviews_on_push": False,
                         "require_code_owner_review": False,
                         "require_last_push_approval": True,
@@ -206,4 +206,3 @@ try:
 
 except Exception as e:
     print(f"An error occurred: {e}")
-    
