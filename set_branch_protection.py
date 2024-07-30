@@ -227,8 +227,8 @@ try:
 except Exception as e:
     print(f"An error occurred: {e}")
 
-def create_custom_property(org, repo, property_name, property_data):
-    url = f'https://api.github.com/repos/{org}/{repo}/properties/schema'
+def create_custom_property(org, property_name, property_data):
+    url = f'https://api.github.com/orgs/{org}/custom_properties/schema'
     data = {
         "name": property_name,
         "type": property_data['type'],
@@ -248,6 +248,7 @@ def create_custom_property(org, repo, property_name, property_data):
         raise
 
 
+
 # Define custom properties schema
 custom_properties_schema = {
     "team": {
@@ -263,8 +264,16 @@ custom_properties_schema = {
     }
 }
 
-# Create custom properties for each repository
+# Create custom properties at the organization level
+for prop_name, prop_data in custom_properties_schema.items():
+    create_custom_property(ORGANIZATION, prop_name, prop_data)
+    print(f"Created custom property {prop_name} for the organization")
+
+# Set custom property values for each repository
+custom_properties_values = {
+    "team": "default-team",
+    "criticality": "low"
+}
 for repo in target_repositories:
-    for prop_name, prop_data in custom_properties_schema.items():
-        create_custom_property(ORGANIZATION, repo, prop_name, prop_data)
-        print(f"Created custom property {prop_name} for {repo}")
+    set_repo_custom_property(ORGANIZATION, repo, custom_properties_values)
+    print(f"Set custom properties for {repo}")
