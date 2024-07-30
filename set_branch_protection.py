@@ -16,59 +16,8 @@ headers = {
 }
 
 def load_repositories(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-        if isinstance(data, list) and all(isinstance(item, str) for item in data):
-            return data
-        else:
-            raise ValueError("JSON data should be a list of repository names")
-    except Exception as e:
-        print(f"Error loading repositories from {file_path}: {e}")
-        raise
-
-def get_ruleset_by_name(org, ruleset_name):
-    url = f'https://api.github.com/orgs/{org}/rulesets'
-    print(f"Fetching rulesets from URL: {url}")
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        rulesets = response.json()
-        for ruleset in rulesets:
-            if ruleset['name'] == ruleset_name:
-                return ruleset
-        return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching rulesets: {e}")
-        raise
-
-def update_ruleset(org, ruleset_id, data):
-    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
-    print(f"Updating ruleset at URL: {url}")
-    print(f"Request Data: {json.dumps(data, indent=4)}")
-    try:
-        response = requests.put(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error updating ruleset: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
-        raise
-
-def create_ruleset(org, data):
-    url = f'https://api.github.com/orgs/{org}/rulesets'
-    print(f"Creating ruleset at URL: {url}")
-    print(f"Request Data: {json.dumps(data, indent=4)}")
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error creating ruleset: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
-        raise
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
 def create_custom_property(org, property_name, property_data):
     url = f'https://api.github.com/orgs/{org}/properties/schema'
@@ -80,37 +29,128 @@ def create_custom_property(org, property_name, property_data):
     }
     if property_data['type'] == 'single_select':
         data['allowed_values'] = property_data['allowed_values']
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error creating custom property: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
-        if response.status_code == 404:
-            print("Custom properties might not be available for this organization.")
-        return None
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
+    print(f"Created custom property: {property_name}")
+    return response.json()
 
 def set_repo_custom_property(org, repo, properties):
     url = f'https://api.github.com/repos/{org}/{repo}/properties/values'
-    data = {"values": properties}
-    try:
-        response = requests.patch(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error setting custom properties for {repo}: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
-        return None
+    data = {"properties": [{"property_name": k, "value": v} for k, v in properties.items()]}
+    response = requests.patch(url, headers=headers, json=data)
+    response.raise_for_status()
+    print(f"Set custom properties for {repo}")
+    return response.json()
 
-try:
-    # Load repositories from JSON file
-    target_repositories = load_repositories(REPO_FILE)
+def get_or_create_ruleset(org, ruleset_name, repos):
+    url = f'https://api.github.com/orgs/{org}/rulesets'
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    rulesets = response.json()
+    
+    for ruleset in rulesets:
+        if ruleset['name'] == ruleset_name:
+            print(f"Updating existing ruleset: {ruleset_name}")
+            return update_ruleset(org, ruleset['id'], repos)
+    
+    print(f"Creating new ruleset: {ruleset_name}")
+    return create_ruleset(org, ruleset_name, repos)
 
-    # Define custom properties schema
-    custom_properties_schema = {
+def update_ruleset(org, ruleset_id, repos):
+    url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
+    data = {
+        "conditions": {
+            "repository_name": {
+                "include": repos,
+                "exclude": []
+            },
+            "ref_name": {
+                "include": ["refs/heads/main", "refs/heads/master"],
+                "exclude": []
+            }
+        },
+        "rules": [
+            {"type": "deletion"},
+            {"type": "non_fast_forward"},
+            {
+                "type": "pull_request",
+                "parameters": {
+                    "required_approving_review_count": 2,
+                    "dismiss_stale_reviews_on_push": False,
+                    "require_code_owner_review": False,
+                    "require_last_push_approval": True,
+                    "required_review_thread_resolution": True
+                }
+            },
+            {"type": "required_linear_history"},
+            {
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict_required_status_checks_policy": True,
+                    "required_status_checks": [
+                        {"context": "ci/lint"},
+                        {"context": "ci/test"}
+                    ]
+                }
+            }
+        ],
+        "enforcement": "active"
+    }
+    response = requests.patch(url, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()
+
+def create_ruleset(org, ruleset_name, repos):
+    url = f'https://api.github.com/orgs/{org}/rulesets'
+    data = {
+        "name": ruleset_name,
+        "target": "branch",
+        "enforcement": "active",
+        "conditions": {
+            "repository_name": {
+                "include": repos,
+                "exclude": []
+            },
+            "ref_name": {
+                "include": ["refs/heads/main", "refs/heads/master"],
+                "exclude": []
+            }
+        },
+        "rules": [
+            {"type": "deletion"},
+            {"type": "non_fast_forward"},
+            {
+                "type": "pull_request",
+                "parameters": {
+                    "required_approving_review_count": 2,
+                    "dismiss_stale_reviews_on_push": False,
+                    "require_code_owner_review": False,
+                    "require_last_push_approval": True,
+                    "required_review_thread_resolution": True
+                }
+            },
+            {"type": "required_linear_history"},
+            {
+                "type": "required_status_checks",
+                "parameters": {
+                    "strict_required_status_checks_policy": True,
+                    "required_status_checks": [
+                        {"context": "ci/lint"},
+                        {"context": "ci/test"}
+                    ]
+                }
+            }
+        ]
+    }
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()
+
+def main():
+    repos = load_repositories(REPO_FILE)
+    
+    # Define custom properties
+    custom_properties = {
         "team": {
             "type": "string",
             "required": True,
@@ -124,142 +164,21 @@ try:
         }
     }
 
-    # Create custom properties at the organization level
-    for prop_name, prop_data in custom_properties_schema.items():
-        result = create_custom_property(ORGANIZATION, prop_name, prop_data)
-        if result:
-            print(f"Created custom property {prop_name} for the organization")
+    # Create custom properties
+    for prop_name, prop_data in custom_properties.items():
+        create_custom_property(ORGANIZATION, prop_name, prop_data)
 
-    # Set custom property values for each repository
-    custom_properties_values = {
-        "team": "default-team",
-        "criticality": "low"
-    }
-    for repo in target_repositories:
-        result = set_repo_custom_property(ORGANIZATION, repo, custom_properties_values)
-        if result:
-            print(f"Set custom properties for {repo}")
-
-    # Check if a ruleset with the same name already exists
-    matching_ruleset = get_ruleset_by_name(ORGANIZATION, RULESET_NAME)
-
-    bypass_actors = [
-        {
-            "actor_id": 4067333,
-            "actor_type": "Team",
-            "bypass_mode": "always"
+    # Set custom properties for each repository
+    for repo in repos:
+        properties = {
+            "team": "default-team",
+            "criticality": "low"
         }
-    ]
+        set_repo_custom_property(ORGANIZATION, repo, properties)
 
-    ref_name_conditions = {
-        "exclude": [],
-        "include": [
-            "~DEFAULT_BRANCH",
-            "refs/heads/master",
-            "refs/heads/main"
-        ]
-    }
+    # Create or update ruleset
+    ruleset = get_or_create_ruleset(ORGANIZATION, RULESET_NAME, repos)
+    print(json.dumps(ruleset, indent=2))
 
-    def ensure_branches_in_conditions(conditions, ref_name_conditions):
-        if 'ref_name' not in conditions:
-            conditions['ref_name'] = ref_name_conditions
-        else:
-            current_includes = set(conditions['ref_name'].get('include', []))
-            current_includes.update(ref_name_conditions['include'])
-            conditions['ref_name']['include'] = list(current_includes)
-            current_excludes = set(conditions['ref_name'].get('exclude', []))
-            current_excludes.update(ref_name_conditions['exclude'])
-            conditions['ref_name']['exclude'] = list(current_excludes)
-
-    if matching_ruleset:
-        # Ruleset with the same name exists, update it
-        ruleset_id = matching_ruleset['id']
-
-        # Ensure conditions exist in the ruleset
-        if 'conditions' not in matching_ruleset:
-            matching_ruleset['conditions'] = {}
-
-        # Check and update the repository_name condition
-        if 'repository_name' in matching_ruleset['conditions']:
-            matching_ruleset['conditions']['repository_name']['include'] = target_repositories
-            matching_ruleset['conditions']['repository_name']['protected'] = True
-        else:
-            print("'repository_name' not found in ruleset conditions, adding it.")
-            matching_ruleset['conditions']['repository_name'] = {
-                'include': target_repositories,
-                'exclude': [],
-                'protected': True
-            }
-
-        # Ensure the ref_name conditions include the necessary branches
-        ensure_branches_in_conditions(matching_ruleset['conditions'], ref_name_conditions)
-
-        # Enable enforcement
-        matching_ruleset['enforcement'] = 'active'
-
-        # Add or update bypass_actors
-        matching_ruleset['bypass_actors'] = bypass_actors
-
-        # Update the ruleset on GitHub
-        updated_ruleset = update_ruleset(ORGANIZATION, ruleset_id, matching_ruleset)
-
-        print("Updated Ruleset:")
-        print(json.dumps(updated_ruleset, indent=4))
-    else:
-        # No matching ruleset, create a new one
-        new_ruleset_data = {
-            "name": RULESET_NAME,
-            "target": "branch",
-            "enforcement": "active",
-            "conditions": {
-                "ref_name": ref_name_conditions,
-                "repository_name": {
-                    "include": target_repositories,
-                    "exclude": [],
-                    "protected": True
-                }
-            },
-            "rules": [
-                {
-                    "type": "deletion"
-                },
-                {
-                    "type": "non_fast_forward"
-                },
-                {
-                    "type": "pull_request",
-                    "parameters": {
-                        "required_approving_review_count": 2,
-                        "dismiss_stale_reviews_on_push": False,
-                        "require_code_owner_review": False,
-                        "require_last_push_approval": True,
-                        "required_review_thread_resolution": True
-                    }
-                },
-                {
-                    "type": "required_linear_history"
-                },
-                {
-                    "type": "required_status_checks",
-                    "parameters": {
-                        "strict_required_status_checks_policy": True,
-                        "do_not_enforce_on_create": False,
-                        "required_status_checks": [
-                            {
-                                "context": "ci/lint"
-                            },
-                            {
-                                "context": "ci/test"
-                            }
-                        ]
-                    }
-                }
-            ],
-            "bypass_actors": bypass_actors
-        }
-        created_ruleset = create_ruleset(ORGANIZATION, new_ruleset_data)
-        print("Created New Ruleset:")
-        print(json.dumps(created_ruleset, indent=4))
-
-except Exception as e:
-    print(f"An error occurred: {e}")
+if __name__ == "__main__":
+    main()
