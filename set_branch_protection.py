@@ -45,7 +45,6 @@ def get_ruleset_by_name(org, ruleset_name):
 def update_ruleset(org, ruleset_id, data):
     url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
     print(f"Updating ruleset at URL: {url}")
-    print(f"Request Headers: {headers}")
     print(f"Request Data: {json.dumps(data, indent=4)}")
     try:
         response = requests.put(url, headers=headers, json=data)
@@ -60,7 +59,6 @@ def update_ruleset(org, ruleset_id, data):
 def create_ruleset(org, data):
     url = f'https://api.github.com/orgs/{org}/rulesets'
     print(f"Creating ruleset at URL: {url}")
-    print(f"Request Headers: {headers}")
     print(f"Request Data: {json.dumps(data, indent=4)}")
     try:
         response = requests.post(url, headers=headers, json=data)
@@ -72,11 +70,31 @@ def create_ruleset(org, data):
         print(f"Response content: {response.content}")
         raise
 
+def create_custom_property(org, property_name, property_data):
+    url = f'https://api.github.com/orgs/{org}/properties/schema'
+    data = {
+        "name": property_name,
+        "type": property_data['type'],
+        "required": property_data.get('required', False),
+        "description": property_data.get('description', '')
+    }
+    if property_data['type'] == 'single_select':
+        data['allowed_values'] = property_data['allowed_values']
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error creating custom property: {e}")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.content}")
+        if response.status_code == 404:
+            print("Custom properties might not be available for this organization.")
+        return None
+
 def set_repo_custom_property(org, repo, properties):
     url = f'https://api.github.com/repos/{org}/{repo}/properties/values'
-    data = {
-        "properties": [{"property_name": k, "value": v} for k, v in properties.items()]
-    }
+    data = {"values": properties}
     try:
         response = requests.patch(url, headers=headers, json=data)
         response.raise_for_status()
@@ -85,23 +103,42 @@ def set_repo_custom_property(org, repo, properties):
         print(f"Error setting custom properties for {repo}: {e}")
         print(f"Response status code: {response.status_code}")
         print(f"Response content: {response.content}")
-        raise
+        return None
 
 try:
     # Load repositories from JSON file
     target_repositories = load_repositories(REPO_FILE)
 
-    # Define custom properties
-    custom_properties = {
+    # Define custom properties schema
+    custom_properties_schema = {
+        "team": {
+            "type": "string",
+            "required": True,
+            "description": "The team responsible for this repository"
+        },
+        "criticality": {
+            "type": "single_select",
+            "required": True,
+            "description": "The criticality level of the repository",
+            "allowed_values": ["low", "medium", "high"]
+        }
+    }
+
+    # Create custom properties at the organization level
+    for prop_name, prop_data in custom_properties_schema.items():
+        result = create_custom_property(ORGANIZATION, prop_name, prop_data)
+        if result:
+            print(f"Created custom property {prop_name} for the organization")
+
+    # Set custom property values for each repository
+    custom_properties_values = {
         "team": "default-team",
         "criticality": "low"
     }
-    
-
-    # Set custom properties for each repository
     for repo in target_repositories:
-        set_repo_custom_property(ORGANIZATION, repo, custom_properties)
-        print(f"Set custom properties for {repo}")
+        result = set_repo_custom_property(ORGANIZATION, repo, custom_properties_values)
+        if result:
+            print(f"Set custom properties for {repo}")
 
     # Check if a ruleset with the same name already exists
     matching_ruleset = get_ruleset_by_name(ORGANIZATION, RULESET_NAME)
@@ -226,57 +263,3 @@ try:
 
 except Exception as e:
     print(f"An error occurred: {e}")
-
-def create_custom_property(org, property_name, property_data):
-    url = f'https://api.github.com/orgs/{org}/custom_properties/schema'
-    data = {
-        "properties": [{
-            "name": property_name,
-            "type": property_data['type'],
-            "required": property_data.get('required', False),
-            "description": property_data.get('description', '')
-        }]
-    }
-    if property_data['type'] == 'single_select':
-        data['properties'][0]['allowed_values'] = property_data['allowed_values']
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error creating custom property: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
-        raise
-
-
-
-# Define custom properties schema
-custom_properties_schema = {
-    "team": {
-        "type": "string",
-        "required": True,
-        "description": "The team responsible for this repository"
-    },
-    "criticality": {
-        "type": "single_select",
-        "required": True,
-        "description": "The criticality level of the repository",
-        "allowed_values": ["low", "medium", "high"]
-    }
-}
-
-# Create custom properties at the organization level
-for prop_name, prop_data in custom_properties_schema.items():
-    create_custom_property(ORGANIZATION, prop_name, prop_data)
-    print(f"Created custom property {prop_name} for the organization")
-
-# Set custom property values for each repository
-custom_properties_values = {
-    "team": "default-team",
-    "criticality": "low"
-}
-for repo in target_repositories:
-    set_repo_custom_property(ORGANIZATION, repo, custom_properties_values)
-    print(f"Set custom properties for {repo}")
-
