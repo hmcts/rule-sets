@@ -3,14 +3,14 @@ import json
 import os
 
 # Configuration
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+OAUTH_TOKEN = os.getenv('OAUTH_TOKEN')
 ORGANIZATION = 'hmcts-test'
 RULESET_ID = '1239224'
 REPO_FILE = 'scripts/production_repos.json'
 
 # Headers for authentication
 headers = {
-    'Authorization': f'Bearer {GITHUB_TOKEN}',
+    'Authorization': f'Bearer {OAUTH_TOKEN}',
     'Accept': 'application/vnd.github+json',
     'Content-Type': 'application/json'
 }
