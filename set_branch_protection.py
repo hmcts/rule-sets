@@ -10,13 +10,11 @@ REPO_FILE = 'production-repos.json'
 
 # Headers for authentication
 headers = {
-    'Authorization': f'Bearer {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github+json',
-    'Content-Type': 'application/json',
+    'Authorization': f'token {GITHUB_TOKEN}',
+    'Accept': 'application/vnd.github.v3+json',
     'X-GitHub-Api-Version': '2022-11-28'
 }
 
-# Function to load repositories from JSON file
 def load_repositories(file_path):
     try:
         with open(file_path, 'r') as file:
@@ -29,7 +27,6 @@ def load_repositories(file_path):
         print(f"Error loading repositories from {file_path}: {e}")
         raise
 
-# Function to get the current ruleset by name
 def get_ruleset_by_name(org, ruleset_name):
     url = f'https://api.github.com/orgs/{org}/rulesets'
     print(f"Fetching rulesets from URL: {url}")
@@ -45,14 +42,13 @@ def get_ruleset_by_name(org, ruleset_name):
         print(f"Error fetching rulesets: {e}")
         raise
 
-# Function to update the ruleset
 def update_ruleset(org, ruleset_id, data):
     url = f'https://api.github.com/orgs/{org}/rulesets/{ruleset_id}'
     print(f"Updating ruleset at URL: {url}")
     print(f"Request Headers: {headers}")
     print(f"Request Data: {json.dumps(data, indent=4)}")
     try:
-        response = requests.put(url, headers=headers, data=json.dumps(data))
+        response = requests.put(url, headers=headers, json=data)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -61,14 +57,13 @@ def update_ruleset(org, ruleset_id, data):
         print(f"Response content: {response.content}")
         raise
 
-# Function to create a new ruleset
 def create_ruleset(org, data):
     url = f'https://api.github.com/orgs/{org}/rulesets'
     print(f"Creating ruleset at URL: {url}")
     print(f"Request Headers: {headers}")
     print(f"Request Data: {json.dumps(data, indent=4)}")
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(data))
+        response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -77,38 +72,32 @@ def create_ruleset(org, data):
         print(f"Response content: {response.content}")
         raise
 
-# Function to get custom properties
 def get_custom_properties(org):
     url = f'https://api.github.com/orgs/{org}/properties/schema'
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()
 
-# Function to set custom property
-def set_custom_property(org, property_name, property_data):
+def create_custom_property(org, property_name, property_data):
     url = f'https://api.github.com/orgs/{org}/properties/schema'
     data = {
         "name": property_name,
-        "value_type": property_data['value_type'],
+        "type": property_data['type'],
         "required": property_data.get('required', False),
-        "default": property_data.get('default'),
-        "description": property_data.get('description', '')
+        "description": property_data.get('description', ''),
     }
+    if property_data['type'] == 'single_select':
+        data['allowed_values'] = property_data['allowed_values']
     response = requests.post(url, headers=headers, json=data)
     response.raise_for_status()
     return response.json()
 
-# Function to set repo custom property
-def set_repo_custom_property(org, repo, property_name, value):
+def set_repo_custom_property(org, repo, properties):
     url = f'https://api.github.com/repos/{org}/{repo}/properties/values'
-    data = {
-        property_name: value
-    }
-    response = requests.patch(url, headers=headers, json=data)
+    response = requests.patch(url, headers=headers, json=properties)
     response.raise_for_status()
     return response.json()
 
-# Main logic
 try:
     # Load repositories from JSON file
     target_repositories = load_repositories(REPO_FILE)
@@ -116,27 +105,37 @@ try:
     # Define custom properties
     custom_properties = {
         "team": {
-            "value_type": "string",
+            "type": "string",
             "required": True,
             "description": "The team responsible for this repository"
         },
         "criticality": {
-            "value_type": "single_select",
+            "type": "single_select",
             "required": True,
-            "default": "low",
             "description": "The criticality level of the repository",
             "allowed_values": ["low", "medium", "high"]
         }
     }
 
-    # Set custom properties for the organization
+    # Create custom properties for the organization
     for prop_name, prop_data in custom_properties.items():
-        set_custom_property(ORGANIZATION, prop_name, prop_data)
+        try:
+            create_custom_property(ORGANIZATION, prop_name, prop_data)
+            print(f"Created custom property: {prop_name}")
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 422:  # Property already exists
+                print(f"Custom property {prop_name} already exists")
+            else:
+                raise
 
-    # Set custom properties for each repository (example values)
+    # Set custom properties for each repository
     for repo in target_repositories:
-        set_repo_custom_property(ORGANIZATION, repo, "team", "default-team")
-        set_repo_custom_property(ORGANIZATION, repo, "criticality", "low")
+        properties = {
+            "team": "default-team",
+            "criticality": "low"
+        }
+        set_repo_custom_property(ORGANIZATION, repo, properties)
+        print(f"Set custom properties for {repo}")
 
     # Check if a ruleset with the same name already exists
     matching_ruleset = get_ruleset_by_name(ORGANIZATION, RULESET_NAME)
