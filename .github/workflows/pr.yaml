@@ -1,42 +1,32 @@
-name: Update Organization Ruleset
+name: Set Branch Protection
 
 on:
   push:
     branches:
-      - master
+      - main
       - update-file-path
-  workflow_dispatch:
-
-env:
-  TF_LOG: INFO
-
-permissions:
-  id-token: write
-  issues: write
-  pull-requests: write
-  contents: read
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  update-org-ruleset:
+  set-branch-protection:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
 
-      - name: Update Organization Ruleset
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          echo "Running set_branch_protection.py"
-          python set_branch_protection.py
-          echo "Script execution completed"
+    - name: Run branch protection script
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        python set_branch_protection.py "$GITHUB_TOKEN"

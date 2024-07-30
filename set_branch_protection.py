@@ -9,6 +9,15 @@ ORGANIZATION = 'hmcts-test'
 RULESET_NAME = 'test-ruleset'
 REPO_FILE = 'production-repos.json'
 
+if len(sys.argv) > 1:
+    GITHUB_TOKEN = sys.argv[1]
+else:
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+
+if not GITHUB_TOKEN:
+    print("Error: GITHUB_TOKEN not found in environment variables or command-line arguments.")
+    sys.exit(1)
+
 if not GITHUB_TOKEN:
     print("Error: GITHUB_TOKEN not found in environment variables.")
     sys.exit(1)
