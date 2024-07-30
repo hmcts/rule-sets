@@ -11,7 +11,7 @@ REPO_FILE = 'production-repos.json'
 # Headers for authentication
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json',
+    'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28'
 }
 
@@ -72,30 +72,13 @@ def create_ruleset(org, data):
         print(f"Response content: {response.content}")
         raise
 
-def create_custom_property(org, property_name, property_data):
-    url = f'https://api.github.com/orgs/{org}/custom_properties/schema'
-    data = {
-        "name": property_name,
-        "type": property_data['type'],
-        "required": property_data.get('required', False),
-        "description": property_data.get('description', ''),
-    }
-    if property_data['type'] == 'single_select':
-        data['allowed_values'] = property_data['allowed_values']
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error creating custom property: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
-        raise
-
 def set_repo_custom_property(org, repo, properties):
-    url = f'https://api.github.com/repos/{org}/{repo}/custom_properties/values'
+    url = f'https://api.github.com/repos/{org}/{repo}/properties/values'
+    data = {
+        "properties": [{"property_name": k, "value": v} for k, v in properties.items()]
+    }
     try:
-        response = requests.patch(url, headers=headers, json=properties)
+        response = requests.patch(url, headers=headers, json=data)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -110,37 +93,13 @@ try:
 
     # Define custom properties
     custom_properties = {
-        "team": {
-            "type": "string",
-            "required": True,
-            "description": "The team responsible for this repository"
-        },
-        "criticality": {
-            "type": "single_select",
-            "required": True,
-            "description": "The criticality level of the repository",
-            "allowed_values": ["low", "medium", "high"]
-        }
+        "team": "default-team",
+        "criticality": "low"
     }
-
-    # Create custom properties for the organization
-    for prop_name, prop_data in custom_properties.items():
-        try:
-            create_custom_property(ORGANIZATION, prop_name, prop_data)
-            print(f"Created custom property: {prop_name}")
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 422:  # Property already exists
-                print(f"Custom property {prop_name} already exists")
-            else:
-                raise
 
     # Set custom properties for each repository
     for repo in target_repositories:
-        properties = {
-            "team": "default-team",
-            "criticality": "low"
-        }
-        set_repo_custom_property(ORGANIZATION, repo, properties)
+        set_repo_custom_property(ORGANIZATION, repo, custom_properties)
         print(f"Set custom properties for {repo}")
 
     # Check if a ruleset with the same name already exists
