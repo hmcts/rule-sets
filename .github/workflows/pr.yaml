@@ -27,6 +27,6 @@ jobs:
 
     - name: Run branch protection script
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: |
         python set_branch_protection.py "$GITHUB_TOKEN"
