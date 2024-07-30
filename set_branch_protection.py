@@ -230,13 +230,15 @@ except Exception as e:
 def create_custom_property(org, property_name, property_data):
     url = f'https://api.github.com/orgs/{org}/custom_properties/schema'
     data = {
-        "name": property_name,
-        "type": property_data['type'],
-        "required": property_data.get('required', False),
-        "description": property_data.get('description', '')
+        "properties": [{
+            "name": property_name,
+            "type": property_data['type'],
+            "required": property_data.get('required', False),
+            "description": property_data.get('description', '')
+        }]
     }
     if property_data['type'] == 'single_select':
-        data['allowed_values'] = property_data['allowed_values']
+        data['properties'][0]['allowed_values'] = property_data['allowed_values']
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
@@ -277,3 +279,4 @@ custom_properties_values = {
 for repo in target_repositories:
     set_repo_custom_property(ORGANIZATION, repo, custom_properties_values)
     print(f"Set custom properties for {repo}")
+
