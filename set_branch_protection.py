@@ -2,7 +2,6 @@ import requests
 import json
 import os
 
-
 # Configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 ORGANIZATION = 'hmcts-test'
@@ -22,10 +21,10 @@ def load_repositories(file_path):
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
-        if isinstance(data, list):
+        if isinstance(data, list) and all(isinstance(item, str) for item in data):
             return data
         else:
-            raise ValueError("JSON data should be a list of repositories")
+            raise ValueError("JSON data should be a list of repository names")
     except Exception as e:
         print(f"Error loading repositories from {file_path}: {e}")
         raise
@@ -78,10 +77,66 @@ def create_ruleset(org, data):
         print(f"Response content: {response.content}")
         raise
 
+# Function to get custom properties
+def get_custom_properties(org):
+    url = f'https://api.github.com/orgs/{org}/properties/schema'
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+# Function to set custom property
+def set_custom_property(org, property_name, property_data):
+    url = f'https://api.github.com/orgs/{org}/properties/schema'
+    data = {
+        "name": property_name,
+        "value_type": property_data['value_type'],
+        "required": property_data.get('required', False),
+        "default": property_data.get('default'),
+        "description": property_data.get('description', '')
+    }
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()
+
+# Function to set repo custom property
+def set_repo_custom_property(org, repo, property_name, value):
+    url = f'https://api.github.com/repos/{org}/{repo}/properties/values'
+    data = {
+        property_name: value
+    }
+    response = requests.patch(url, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()
+
 # Main logic
 try:
     # Load repositories from JSON file
     target_repositories = load_repositories(REPO_FILE)
+
+    # Define custom properties
+    custom_properties = {
+        "team": {
+            "value_type": "string",
+            "required": True,
+            "description": "The team responsible for this repository"
+        },
+        "criticality": {
+            "value_type": "single_select",
+            "required": True,
+            "default": "low",
+            "description": "The criticality level of the repository",
+            "allowed_values": ["low", "medium", "high"]
+        }
+    }
+
+    # Set custom properties for the organization
+    for prop_name, prop_data in custom_properties.items():
+        set_custom_property(ORGANIZATION, prop_name, prop_data)
+
+    # Set custom properties for each repository (example values)
+    for repo in target_repositories:
+        set_repo_custom_property(ORGANIZATION, repo, "team", "default-team")
+        set_repo_custom_property(ORGANIZATION, repo, "criticality", "low")
 
     # Check if a ruleset with the same name already exists
     matching_ruleset = get_ruleset_by_name(ORGANIZATION, RULESET_NAME)
