@@ -13,9 +13,9 @@ permissions:
   id-token: write
   issues: write
   pull-requests: write
-  contents: write
+  contents: read
 
-jobs:
+jobs: 
   pr-infra-check:
     runs-on: ubuntu-latest
     steps:
@@ -24,10 +24,19 @@ jobs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-
+    
+    # # Log into Azure with OIDC integration  
+    # - name: 'Az CLI login'
+    #   uses: azure/login@v1
+    #   with:
+    #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    #     subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
+    
     - name: Install jq
       run: sudo apt-get install jq -y
-
+    
+    # List all the repos and branches that the rules are going to be applied on
     - name: List Repositories and Branches
       run: |
           echo "Checking Repositories and Branches"
@@ -37,7 +46,7 @@ jobs:
             curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
                  -H "Accept: application/vnd.github.v3+json" \
                  https://api.github.com/repos/hmcts/$repo
-
+    
             for branch in main master; do
               echo "Checking branch: $branch in repository: $repo"
               curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
