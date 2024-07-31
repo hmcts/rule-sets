@@ -34,4 +34,4 @@ jobs:
         git commit -m 'Update repository list'
         git push
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
