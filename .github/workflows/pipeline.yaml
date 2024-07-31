@@ -74,7 +74,7 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform plan
+      run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
 
     - name: Terraform Apply
       working-directory: components
@@ -84,5 +84,5 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
-      run: terraform apply -auto-approve
+      run: terraform apply -var="oauth_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
 
