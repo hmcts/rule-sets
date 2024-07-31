@@ -22,21 +22,15 @@ headers = {
 def define_custom_property(org_name):
     """
     Define a custom property for the organization.
-    
-    Parameters:
-        org_name (str): The name of the GitHub organization.
-    
-    Returns:
-        int: The status code of the response.
     """
     url = f"{API_BASE}/orgs/{org_name}/properties/schema/is_production"
     data = {
-        "value_type": "true_false",           # Property type (boolean)
-        "required": False,                    # Property is not required
-        "default_value": "",                  # Default value is empty
+        "value_type": "true_false",
+        "required": False,
+        "default_value": "",
         "description": "Indicates if the repository is in production",
-        "allowed_values": None,               # No specific allowed values
-        "values_editable_by": "org_and_repo_actors" # Who can edit the property
+        "allowed_values": None,
+        "values_editable_by": "org_and_repo_actors"
     }
     response = requests.put(url, headers=headers, json=data)
     if response.status_code != 200:
@@ -47,12 +41,6 @@ def define_custom_property(org_name):
 def get_org_repos(org_name):
     """
     Get all repositories in the organization.
-    
-    Parameters:
-        org_name (str): The name of the GitHub organization.
-    
-    Returns:
-        list: A list of repositories in the organization.
     """
     url = f"{API_BASE}/orgs/{org_name}/repos"
     response = requests.get(url, headers=headers)
@@ -62,13 +50,6 @@ def get_org_repos(org_name):
 def set_custom_properties(repo_full_name, properties):
     """
     Set custom properties for a repository.
-    
-    Parameters:
-        repo_full_name (str): The full name of the repository (org/repo).
-        properties (dict): The custom properties to set.
-    
-    Returns:
-        int: The status code of the response.
     """
     owner, repo = repo_full_name.split('/')
     url = f"{API_BASE}/repos/{owner}/{repo}/properties/values"
@@ -87,12 +68,6 @@ def set_custom_properties(repo_full_name, properties):
 def get_custom_properties(repo_full_name):
     """
     Get custom properties for a repository.
-    
-    Parameters:
-        repo_full_name (str): The full name of the repository (org/repo).
-    
-    Returns:
-        dict: The custom properties of the repository.
     """
     owner, repo = repo_full_name.split('/')
     url = f"{API_BASE}/repos/{owner}/{repo}/properties/values"
@@ -103,12 +78,25 @@ def get_custom_properties(repo_full_name):
 def load_production_repos():
     """
     Load production repositories from production-repos.json file.
-    
-    Returns:
-        list: A list of production repository names.
     """
-    with open('../production-repos.json', 'r') as f:
-        return json.load(f)
+    # The file is in the same directory as the script, so we don't need to change directories
+    json_file_path = '../production-repos.json'
+    
+    try:
+        with open(json_file_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: 'production-repos.json' not found at {os.path.abspath(json_file_path)}")
+        print("Current working directory:", os.getcwd())
+        print("Contents of the current directory:")
+        print(os.listdir('.'))
+        raise
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON from {json_file_path}: {e}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error reading {json_file_path}: {e}")
+        raise
 
 # Define the custom property at the organization level
 try:
@@ -132,6 +120,7 @@ for repo in production_repos:
     print(f"- {repo}")
 
 # Apply custom properties to each repository and verify
+repo_ids = []
 for repo_name in production_repos:
     repo_full_name = f"{ORG_NAME}/{repo_name}"
     custom_properties = {
@@ -146,6 +135,12 @@ for repo_name in production_repos:
         # Verify the properties were set correctly
         retrieved_properties = get_custom_properties(repo_full_name)
         print(f"Custom properties for {repo_full_name}: {retrieved_properties}")
+
+        # Get repository ID
+        for repo in repos:
+            if repo["name"] == repo_name:
+                repo_ids.append(repo["id"])
+
     except requests.RequestException as e:
         print(f"Failed to set properties for {repo_full_name}: {str(e)}")
 
