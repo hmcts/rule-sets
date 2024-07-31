@@ -1,4 +1,4 @@
-variable "oauth_token" {
+variable "github_token" {
   description = "OAUTH token to use for authentication."
   type        = string
   sensitive   = true

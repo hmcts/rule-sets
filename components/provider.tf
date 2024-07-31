@@ -4,7 +4,7 @@ provider "azurerm" {
 
 provider "github" {
   owner = "hmcts-test"
-  token = var.oauth_token
+  token = var.github_token
 }
 
 terraform {
@@ -24,7 +24,7 @@ terraform {
   required_providers {
     github = {
       source  = "integrations/github"
-      version = "~> 6.0"
+      version = "~> 5.0"
     }
   }
 }
