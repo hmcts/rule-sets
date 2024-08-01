@@ -42,4 +42,4 @@ jobs:
           git commit -m 'Update README with production repository count' || echo "No changes to commit"
           git push origin DTSPO-18104-typo-file-V2
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
