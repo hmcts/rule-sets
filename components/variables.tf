@@ -62,8 +62,3 @@ variable "builtFrom" {
   type        = string
   default     = "https://github.com/hmcts/github-repository-rules"
 }
-
-variable "batch_size" {
-  type    = number
-  default = 20
-}
