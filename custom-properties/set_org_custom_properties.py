@@ -1,6 +1,10 @@
 import os
 import requests
 import json
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 
 # GitHub API base URL
 API_BASE = "https://api.github.com"
@@ -32,9 +36,9 @@ def define_custom_property(org_name):
         "allowed_values": None,
         "values_editable_by": "org_and_repo_actors"
     }
-    response = requests.put(url, headers=headers, json=data)
+    response = requests.put(url, headers=headers, json=data, verify=True)
     if response.status_code != 200:
-        print(f"Failed to define custom property for {org_name}: {response.json().get('message', 'Unknown error')}")
+        logging.error(f"Failed to define custom property for {org_name}: {response.json().get('message', 'Unknown error')}")
     response.raise_for_status()
     return response.status_code
 
@@ -43,7 +47,7 @@ def get_org_repos(org_name):
     Get all repositories in the organization.
     """
     url = f"{API_BASE}/orgs/{org_name}/repos"
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=True)
     response.raise_for_status()
     return response.json()
 
@@ -59,9 +63,9 @@ def set_custom_properties(repo_full_name, properties):
             for key, value in properties.items()
         ]
     }
-    response = requests.patch(url, headers=headers, json=data)
+    response = requests.patch(url, headers=headers, json=data, verify=True)
     if response.status_code != 204:
-        print(f"Failed to set properties for {repo_full_name}: {response.json().get('message', 'Unknown error')}")
+        logging.error(f"Failed to set properties for {repo_full_name}: {response.json().get('message', 'Unknown error')}")
     response.raise_for_status()
     return response.status_code
 
@@ -71,7 +75,7 @@ def get_custom_properties(repo_full_name):
     """
     owner, repo = repo_full_name.split('/')
     url = f"{API_BASE}/repos/{owner}/{repo}/properties/values"
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=True)
     response.raise_for_status()
     return response.json()
 
@@ -79,45 +83,46 @@ def load_production_repos():
     """
     Load production repositories from production-repos.json file.
     """
-    # The file is in the same directory as the script, so we don't need to change directories
     json_file_path = '../production-repos.json'
     
     try:
         with open(json_file_path, 'r') as f:
-            return json.load(f)
+            repos = json.load(f)
+            if not isinstance(repos, list):
+                raise ValueError("JSON content is not a list")
+            return repos
     except FileNotFoundError:
-        print(f"Error: 'production-repos.json' not found at {os.path.abspath(json_file_path)}")
-        print("Current working directory:", os.getcwd())
-        print("Contents of the current directory:")
-        print(os.listdir('.'))
+        logging.error(f"Error: 'production-repos.json' not found at {os.path.abspath(json_file_path)}")
+        logging.error("Current working directory: %s", os.getcwd())
+        logging.error("Contents of the current directory: %s", os.listdir('.'))
         raise
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON from {json_file_path}: {e}")
+        logging.error(f"Error decoding JSON from {json_file_path}: {e}")
         raise
     except Exception as e:
-        print(f"Unexpected error reading {json_file_path}: {e}")
+        logging.error(f"Unexpected error reading {json_file_path}: {e}")
         raise
 
 # Define the custom property at the organization level
 try:
     status = define_custom_property(ORG_NAME)
-    print(f"Defined custom property for {ORG_NAME}: Status {status}")
+    logging.info(f"Defined custom property for {ORG_NAME}: Status {status}")
 except requests.RequestException as e:
-    print(f"Failed to define custom property for {ORG_NAME}: {str(e)}")
+    logging.error(f"Failed to define custom property for {ORG_NAME}: {str(e)}")
 
 # Get all repositories in the organization
 try:
     repos = get_org_repos(ORG_NAME)
 except requests.RequestException as e:
-    print(f"Failed to get repositories for {ORG_NAME}: {str(e)}")
+    logging.error(f"Failed to get repositories for {ORG_NAME}: {str(e)}")
     repos = []
 
 # Load production repositories
 production_repos = load_production_repos()
 
-print(f"Repositories found in production-repos.json:")
+logging.info(f"Repositories found in production-repos.json:")
 for repo in production_repos:
-    print(f"- {repo}")
+    logging.info(f"- {repo}")
 
 # Apply custom properties to each repository and verify
 repo_ids = []
@@ -127,14 +132,14 @@ for repo_name in production_repos:
         "is_production": "true"
     }
 
-    print(f"\nSetting custom property for: {repo_name}")
+    logging.info(f"\nSetting custom property for: {repo_name}")
     try:
         status = set_custom_properties(repo_full_name, custom_properties)
-        print(f"Set properties for {repo_full_name}: Status {status}")
+        logging.info(f"Set properties for {repo_full_name}: Status {status}")
 
         # Verify the properties were set correctly
         retrieved_properties = get_custom_properties(repo_full_name)
-        print(f"Custom properties for {repo_full_name}: {retrieved_properties}")
+        logging.info(f"Custom properties for {repo_full_name}: {retrieved_properties}")
 
         # Get repository ID
         for repo in repos:
@@ -142,6 +147,6 @@ for repo_name in production_repos:
                 repo_ids.append(repo["id"])
 
     except requests.RequestException as e:
-        print(f"Failed to set properties for {repo_full_name}: {str(e)}")
+        logging.error(f"Failed to set properties for {repo_full_name}: {str(e)}")
 
-print("\nScript execution completed.")
+logging.info("\nScript execution completed.")
