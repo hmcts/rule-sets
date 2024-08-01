@@ -36,7 +36,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ReadMe.md
-          git diff-index --quiet HEAD || git commit -m 'Update README with production repository count'
-          git push || true
+          git diff --quiet || git commit -m 'Update README with production repository count'
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}

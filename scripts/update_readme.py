@@ -52,6 +52,7 @@ def update_readme(repo_count):
             + readme_content[end_index:]
         )
     else:
+        print("Markers not found in ReadMe.md")
         readme_content.append(f"\n{start_marker}\n{new_line}\n{end_marker}\n")
 
     with open(README_FILE_PATH, 'w') as file:
@@ -65,4 +66,3 @@ try:
     update_readme(repo_count)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
-
