@@ -22,7 +22,7 @@ def load_repos(file_path):
         print(f"Unexpected error reading {file_path}: {e}")
         raise
 
-def update_readme(prod_count, dev_count):
+def update_readme(prod_count, dev_count, prod_link):
     """
     Update the README file with the counts of various types of repositories.
     """
@@ -32,7 +32,7 @@ def update_readme(prod_count, dev_count):
     table_content = f"""
 | **Repository Type**       | **Count** |
 |---------------------------|-----------|
-| Production Repositories   | {prod_count}        |
+| Production Repositories   | [{prod_count}]({prod_link})        |
 | Development Repositories  | {dev_count}        |
 """
 
@@ -69,6 +69,9 @@ try:
     # Placeholder value for dev repo count, can be updated similarly
     development_count = 0  # Update this to load actual data if available
     
-    update_readme(production_count, development_count)
+    # Link to the production-repos.json file in the repository
+    prod_link = "https://github.com/hmcts/github-repository-rules/blob/DTSPO-18104-typo-file-V2/production-repos.json"
+    
+    update_readme(production_count, development_count, prod_link)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
