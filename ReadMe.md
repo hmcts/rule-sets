@@ -55,7 +55,7 @@ We recently addressed issues with scaling to a larger number of repositories. He
 
 1. Implemented a batching system that splits repositories into smaller groups of 20.
 2. Processes each batch sequentially with built-in delays between batches.
-3. Only applies branch protection rules after all batches have been processed.
+3. Only applies rule sets after all batches have been processed.
 
 These changes allow us to handle a significantly larger number of repositories without overwhelming the GitHub API or causing Terraform to crash. The system is now more scalable for future growth.
 
@@ -65,7 +65,16 @@ These changes allow us to handle a significantly larger number of repositories w
 - `data.tf`: Defines data sources for GitHub repositories and branches.
 - `locals.tf`: Contains local variables for processing repository data.
 - `outputs.tf`: Defines outputs for branch summaries and counts.
-- `prod-repos.json`: List of repositories to manage.
+- `provider.tf`: Terraform/GitHub providers.
+- `production-repos.json`: List of repositories to manage.
+- `update_raedme.py`: Updates the read me file with stats of the number of prod, dev repositories etc.
+- `update-repo-list.py`: Updates the JSON file that contains the number of production/dev repositories.
+- `set_org_custom_properties.py`: Creates the custom properties listed in the JSON file on the repositories.
+- `pr.yaml`: Pipeline triggers a terraform plan when a PR is raised from master.
+- `pipeline.yaml`: Pipeline runs after the PR workflow has succesfully ran and applies the terraform.
+- `update-readme.yaml`: This pipeline runs as a cron job every midnight and updates the read me file with new stats.
+- `update-repos.json`: This pipeline runs as a cron job and will update the JSON file with new repositories.
+
 
 ## Troubleshooting
 
