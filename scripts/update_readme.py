@@ -2,8 +2,8 @@ import os
 import json
 
 # File path for the JSON file
-JSON_FILE_PATH = 'production-repos.json'
-README_FILE_PATH = 'ReadMe.md'
+JSON_FILE_PATH = '../production-repos.json'
+README_FILE_PATH = '../ReadMe.md'
 
 def load_production_repos():
     """
@@ -46,14 +46,12 @@ def update_readme(repo_count):
             end_index = i
 
     if start_index is not None and end_index is not None:
-        print(f"Updating README between lines {start_index} and {end_index}")
         readme_content = (
             readme_content[:start_index + 1]
             + [new_line]
             + readme_content[end_index:]
         )
     else:
-        print("Markers not found in ReadMe.md")
         readme_content.append(f"\n{start_marker}\n{new_line}\n{end_marker}\n")
 
     with open(README_FILE_PATH, 'w') as file:
@@ -67,3 +65,4 @@ try:
     update_readme(repo_count)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
+
