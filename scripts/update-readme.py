@@ -22,7 +22,7 @@ def load_repos(file_path):
         print(f"Unexpected error reading {file_path}: {e}")
         raise
 
-def update_readme(prod_count, dev_count, test_count):
+def update_readme(prod_count, dev_count):
     """
     Update the README file with the counts of various types of repositories.
     """
@@ -34,9 +34,6 @@ def update_readme(prod_count, dev_count, test_count):
 |---------------------------|-----------|
 | Production Repositories   | {prod_count}        |
 | Development Repositories  | {dev_count}        |
-| Testing Repositories      | {test_count}        |
-|                           |           |
-|                           |           |
 """
 
     start_marker = "<!--START_PRODUCTION_COUNT-->"
@@ -69,10 +66,9 @@ try:
     production_count = len(production_repos)
     print(f"Number of production repositories: {production_count}")
     
-    # Placeholder values for dev and test repo counts
+    # Placeholder value for dev repo count, can be updated similarly
     development_count = 0  # Update this to load actual data if available
-    testing_count = 0  # Update this to load actual data if available
     
-    update_readme(production_count, development_count, testing_count)
+    update_readme(production_count, development_count)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
