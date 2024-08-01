@@ -11,7 +11,6 @@ This Terraform configuration automates the process of setting up rule sets acros
 <!--START_PRODUCTION_COUNT-->
 <!--END_PRODUCTION_COUNT-->
 
-
 ## Getting Started
 
 ### Prerequisites
