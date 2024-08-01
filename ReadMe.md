@@ -10,7 +10,7 @@ This Terraform configuration automates the process of setting up branch protecti
 
 <!--START_PRODUCTION_COUNT-->
 
-**Production Repositories Count:** There are currently **12** repositories marked as in production.
+**Production Repositories Count:** There are currently **5** repositories marked as in production.
 <!--END_PRODUCTION_COUNT-->
 
 
