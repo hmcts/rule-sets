@@ -5,34 +5,40 @@ import json
 JSON_FILE_PATH = os.path.join(os.path.dirname(__file__), '../production-repos.json')
 README_FILE_PATH = os.path.join(os.path.dirname(__file__), '../ReadMe.md')
 
-def load_production_repos():
+def load_repos(file_path):
     """
-    Load production repositories from production-repos.json file.
+    Load repositories from the given JSON file.
     """
     try:
-        with open(JSON_FILE_PATH, 'r') as f:
+        with open(file_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Error: 'production-repos.json' not found at {os.path.abspath(JSON_FILE_PATH)}")
-        print("Current working directory:", os.getcwd())
-        print("Contents of the current directory:")
-        print(os.listdir('.'))
+        print(f"Error: '{file_path}' not found.")
         raise
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON from {JSON_FILE_PATH}: {e}")
+        print(f"Error decoding JSON from {file_path}: {e}")
         raise
     except Exception as e:
-        print(f"Unexpected error reading {JSON_FILE_PATH}: {e}")
+        print(f"Unexpected error reading {file_path}: {e}")
         raise
 
-def update_readme(repo_count):
+def update_readme(prod_count, dev_count, test_count):
     """
-    Update the README file with the count of production repositories.
+    Update the README file with the counts of various types of repositories.
     """
     with open(README_FILE_PATH, 'r') as file:
         readme_content = file.readlines()
 
-    new_line = f"\n**Production Repositories Count:** There are currently **{repo_count}** repositories marked as in production.\n"
+    table_content = f"""
+| **Repository Type**       | **Count** |
+|---------------------------|-----------|
+| Production Repositories   | {prod_count}        |
+| Development Repositories  | {dev_count}        |
+| Testing Repositories      | {test_count}        |
+|                           |           |
+|                           |           |
+"""
+
     start_marker = "<!--START_PRODUCTION_COUNT-->"
     end_marker = "<!--END_PRODUCTION_COUNT-->"
 
@@ -48,20 +54,25 @@ def update_readme(repo_count):
     if start_index is not None and end_index is not None:
         readme_content = (
             readme_content[:start_index + 1]
-            + [new_line]
+            + [table_content]
             + readme_content[end_index:]
         )
     else:
-        readme_content.append(f"\n{start_marker}\n{new_line}\n{end_marker}\n")
+        readme_content.append(f"\n{start_marker}\n{table_content}\n{end_marker}\n")
 
     with open(README_FILE_PATH, 'w') as file:
         file.writelines(readme_content)
 
 # Load production repositories
 try:
-    production_repos = load_production_repos()
-    repo_count = len(production_repos)
-    print(f"Number of production repositories: {repo_count}")
-    update_readme(repo_count)
+    production_repos = load_repos(JSON_FILE_PATH)
+    production_count = len(production_repos)
+    print(f"Number of production repositories: {production_count}")
+    
+    # Placeholder values for dev and test repo counts
+    development_count = 0  # Update this to load actual data if available
+    testing_count = 0  # Update this to load actual data if available
+    
+    update_readme(production_count, development_count, testing_count)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
