@@ -3,6 +3,7 @@ import json
 
 # File path for the JSON file
 JSON_FILE_PATH = '../production-repos.json'
+README_FILE_PATH = '../README.md'
 
 def load_production_repos():
     """
@@ -28,8 +29,7 @@ def update_readme(repo_count):
     """
     Update the README file with the count of production repositories.
     """
-    readme_file_path = '../README.md'  # Updated to point to the root directory
-    with open(readme_file_path, 'r') as file:
+    with open(README_FILE_PATH, 'r') as file:
         readme_content = file.readlines()
 
     new_line = f"\n**Production Repositories Count:** There are currently **{repo_count}** repositories marked as in production.\n"
@@ -54,7 +54,7 @@ def update_readme(repo_count):
     else:
         readme_content.append(f"\n{start_marker}\n{new_line}\n{end_marker}\n")
 
-    with open(readme_file_path, 'w') as file:
+    with open(README_FILE_PATH, 'w') as file:
         file.writelines(readme_content)
 
 # Load production repositories
