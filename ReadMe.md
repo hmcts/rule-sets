@@ -8,6 +8,11 @@ This Terraform configuration automates the process of setting up branch protecti
 
 - [Rate Limits Page](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
+<!--START_PRODUCTION_COUNT-->
+
+**Production Repositories Count:** There are currently **9** repositories marked as in production.
+<!--END_PRODUCTION_COUNT-->
+
 ## Getting Started
 
 ### Prerequisites
@@ -38,7 +43,6 @@ To add or remove repositories follow the below:
 3. Create a PR and allow the GH Actions pipeline to run a Terraform Plan to confirm changes are accepted.
 4. Once this first pipeline checks out, the second pipeline will apply your changes and update the branch protection rules.
 5. Once applied delete your branch.
-
 
 ## Recent Changes
 
