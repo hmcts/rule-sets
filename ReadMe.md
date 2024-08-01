@@ -9,6 +9,11 @@ This Terraform configuration automates the process of setting up rule sets acros
 - [Rate Limits Page](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
 <!--START_PRODUCTION_COUNT-->
+
+| **Repository Type**       | **Count** |
+|---------------------------|-----------|
+| Production Repositories   | [12](https://github.com/hmcts/github-repository-rules/blob/DTSPO-18104-typo-file-V2/production-repos.json)        |
+| Development Repositories  | 0        |
 <!--END_PRODUCTION_COUNT-->
 
 
