@@ -22,6 +22,7 @@ This Terraform configuration automates the process of setting up rule sets acros
 ### Configuration
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/hmcts/github-repository-rules.git
 2. Create a `terraform.tfvars` file with your Oauth token:
