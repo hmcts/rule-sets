@@ -3,6 +3,7 @@ name: Pull Request
 on:
   push:
     branches:
+      - master
       - DTSPO-18104-typo-file-V2
   workflow_dispatch:
 
