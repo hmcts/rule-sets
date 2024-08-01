@@ -2,8 +2,8 @@ import os
 import json
 
 # File path for the JSON file
-JSON_FILE_PATH = '../production-repos.json'
-README_FILE_PATH = '../ReadMe.md'
+JSON_FILE_PATH = os.path.join(os.path.dirname(__file__), '../production-repos.json')
+README_FILE_PATH = os.path.join(os.path.dirname(__file__), '../ReadMe.md')
 
 def load_production_repos():
     """
@@ -65,4 +65,3 @@ try:
     update_readme(repo_count)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
-
