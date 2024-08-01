@@ -13,11 +13,10 @@ This Terraform configuration automates the process of setting up branch protecti
 | **Repository Type**       | **Count** |
 |---------------------------|-----------|
 | Production Repositories   | 12        |
-| Development Repositories  |           |
-| Testing Repositories      |           |
+| Development Repositories  | 0        |
+| Testing Repositories      | 0        |
 |                           |           |
 |                           |           |
-
 <!--END_PRODUCTION_COUNT-->
 
 
