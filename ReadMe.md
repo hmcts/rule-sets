@@ -8,6 +8,8 @@ This Terraform configuration automates the process of setting up branch protecti
 
 - [Rate Limits Page](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
+# Number of repositories
+
 <!--START_PRODUCTION_COUNT-->
 
 | **Repository Type**       | **Count** |
