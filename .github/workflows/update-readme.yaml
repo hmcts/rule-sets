@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - DTSPO-18104-typo-file-V2
   workflow_dispatch:
 
 jobs:
