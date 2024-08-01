@@ -65,3 +65,4 @@ try:
     update_readme(repo_count)
 except Exception as e:
     print(f"Failed to load or update repositories: {str(e)}")
+
