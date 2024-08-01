@@ -3,7 +3,7 @@ import json
 
 # File path for the JSON file
 JSON_FILE_PATH = '../production-repos.json'
-README_FILE_PATH = '../README.md'
+README_FILE_PATH = '../ReadMe.md'
 
 def load_production_repos():
     """
