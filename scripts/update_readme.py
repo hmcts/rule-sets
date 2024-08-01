@@ -2,8 +2,8 @@ import os
 import json
 
 # File path for the JSON file
-JSON_FILE_PATH = '../production-repos.json'
-README_FILE_PATH = '../ReadMe.md'
+JSON_FILE_PATH = 'production-repos.json'
+README_FILE_PATH = 'ReadMe.md'
 
 def load_production_repos():
     """
@@ -46,6 +46,7 @@ def update_readme(repo_count):
             end_index = i
 
     if start_index is not None and end_index is not None:
+        print(f"Updating README between lines {start_index} and {end_index}")
         readme_content = (
             readme_content[:start_index + 1]
             + [new_line]

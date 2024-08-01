@@ -2,16 +2,15 @@
 
 This repository contains code to manage GitHub repository branch protection rules for HMCTS.
 
-## Overview
+# Overview
 
 This Terraform configuration automates the process of setting up branch protection rules across multiple GitHub repositories. It implements a batching system to handle a large number of repositories efficiently while respecting GitHub API rate limits.
 
 - [Rate Limits Page](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
 <!--START_PRODUCTION_COUNT-->
-
-**Production Repositories Count:** There are currently **11** repositories marked as in production.
 <!--END_PRODUCTION_COUNT-->
+
 
 ## Getting Started
 
