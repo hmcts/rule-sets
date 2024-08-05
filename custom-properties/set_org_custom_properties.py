@@ -33,7 +33,7 @@ def define_custom_property(org_name):
         "required": False,
         "default_value": "",
         "description": "Indicates if the repository is in production",
-        "allowed_values": None,
+        "allowed_values": [],
         "values_editable_by": "org_and_repo_actors"
     }
     response = requests.put(url, headers=headers, json=data)
