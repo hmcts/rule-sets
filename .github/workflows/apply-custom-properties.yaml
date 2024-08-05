@@ -1,9 +1,6 @@
 name: Update Custom Properties
 
 on:
-  push:
-    branches:
-      - DTSPO-18104-typo-file-V2
   schedule:
     - cron: '0 0 * * *' # Runs daily at midnight
   workflow_dispatch:

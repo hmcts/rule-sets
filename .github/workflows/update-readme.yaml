@@ -1,6 +1,9 @@
 name: Update README
 
 on:
+  push:
+    branches:
+      - DTSPO-18104-typo-file-V2
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
