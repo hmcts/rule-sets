@@ -4,15 +4,6 @@ variable "oauth_token" {
   sensitive   = true
 }
 
-# variable "branches" {
-#   description = "List of branches to apply protection rules"
-#   type        = list(string)
-#   default = [
-#     "master",
-#     "main"
-#   ]
-# }
-
 variable "override_action" {
   description = "The action to override"
   type        = string

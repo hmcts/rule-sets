@@ -36,20 +36,11 @@ def define_custom_property(org_name):
         "allowed_values": None,
         "values_editable_by": "org_and_repo_actors"
     }
-    response = requests.put(url, headers=headers, json=data, verify=True)
+    response = requests.put(url, headers=headers, json=data)
     if response.status_code != 200:
         logging.error(f"Failed to define custom property for {org_name}: {response.json().get('message', 'Unknown error')}")
     response.raise_for_status()
     return response.status_code
-
-def get_org_repos(org_name):
-    """
-    Get all repositories in the organization.
-    """
-    url = f"{API_BASE}/orgs/{org_name}/repos"
-    response = requests.get(url, headers=headers, verify=True)
-    response.raise_for_status()
-    return response.json()
 
 def set_custom_properties(repo_full_name, properties):
     """
@@ -63,7 +54,7 @@ def set_custom_properties(repo_full_name, properties):
             for key, value in properties.items()
         ]
     }
-    response = requests.patch(url, headers=headers, json=data, verify=True)
+    response = requests.patch(url, headers=headers, json=data)
     if response.status_code != 204:
         logging.error(f"Failed to set properties for {repo_full_name}: {response.json().get('message', 'Unknown error')}")
     response.raise_for_status()
@@ -75,7 +66,7 @@ def get_custom_properties(repo_full_name):
     """
     owner, repo = repo_full_name.split('/')
     url = f"{API_BASE}/repos/{owner}/{repo}/properties/values"
-    response = requests.get(url, headers=headers, verify=True)
+    response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()
 
@@ -110,13 +101,6 @@ try:
 except requests.RequestException as e:
     logging.error(f"Failed to define custom property for {ORG_NAME}: {str(e)}")
 
-# Get all repositories in the organization
-try:
-    repos = get_org_repos(ORG_NAME)
-except requests.RequestException as e:
-    logging.error(f"Failed to get repositories for {ORG_NAME}: {str(e)}")
-    repos = []
-
 # Load production repositories
 production_repos = load_production_repos()
 
@@ -140,11 +124,6 @@ for repo_name in production_repos:
         # Verify the properties were set correctly
         retrieved_properties = get_custom_properties(repo_full_name)
         logging.info(f"Custom properties for {repo_full_name}: {retrieved_properties}")
-
-        # Get repository ID
-        for repo in repos:
-            if repo["name"] == repo_name:
-                repo_ids.append(repo["id"])
 
     except requests.RequestException as e:
         logging.error(f"Failed to set properties for {repo_full_name}: {str(e)}")
