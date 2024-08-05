@@ -12,8 +12,8 @@ This Terraform configuration automates the process of setting up rule sets acros
 
 | **Repository Type**       | **Count** |
 |---------------------------|-----------|
-| Production Repositories   | [11](https://github.com/hmcts/github-repository-rules/blob/DTSPO-18104-typo-file-V2/production-repos.json)        |
-| Development Repositories  | 0        |
+| Production Repositories   | 0         |
+| Development Repositories  | 0         |
 <!--END_PRODUCTION_COUNT-->
 
 ## Getting Started
