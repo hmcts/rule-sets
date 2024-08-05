@@ -1,10 +1,6 @@
 name: Update README
 
 on:
-  push:
-    branches:
-      - master
-      - DTSPO-18104-typo-file-V2
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
@@ -36,10 +32,10 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'hmcts-platform-operations'
+          git config --global user.email 'github-platform-operations@HMCTS.NET'
           git add ReadMe.md
           git commit -m 'Update README with production repository count' || echo "No changes to commit"
-          git push origin DTSPO-18104-typo-file-V2
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
