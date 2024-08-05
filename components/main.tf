@@ -73,3 +73,4 @@ resource "github_organization_ruleset" "default_ruleset" {
     bypass_mode = "always"
   }
 }
+

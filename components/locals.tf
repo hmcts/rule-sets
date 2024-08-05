@@ -12,39 +12,8 @@ locals {
     for repo in local.all_repositories : repo
     if !contains(local.excluded_repositories, repo)
   ]
-
-  branches_to_check = ["main", "master"]
-  batch_size        = 10
-
-  # Split repositories into batches of 10 to help handle the API Rate limits
-  repo_batches = chunklist(local.included_repositories, local.batch_size)
-
-  repo_branch_combinations = flatten([
-    for batch in local.repo_batches : [
-      for repo in batch : [
-        for branch in local.branches_to_check : {
-          repo   = repo
-          branch = branch
-        }
-      ]
-    ]
-  ])
-
-  # Create a map of existing branches
-  existing_branches = {
-    for key, branch in data.github_branch.existing_branches :
-    key => branch
-  }
-
-  # Checks if a main/master branch exists on the repositories
-  branch_summary = {
-    for repo in local.included_repositories :
-    repo => {
-      main   = contains(keys(local.existing_branches), "${repo}:main")
-      master = contains(keys(local.existing_branches), "${repo}:master")
-    }
-  }
 }
+
 
 
 locals {
