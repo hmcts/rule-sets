@@ -1,15 +1,7 @@
-variable "branches" {
-  description = "List of branches to apply protection rules"
-  type        = list(string)
-  default = [
-    "master",
-    "main"
-  ]
-}
-
 variable "oauth_token" {
-  description = "List of repositories to exclude from branch protection rules"
+  description = "OAUTH token to use for authentication."
   type        = string
+  sensitive   = true
 }
 
 variable "override_action" {
@@ -52,9 +44,4 @@ variable "builtFrom" {
   description = "Information about the build source or version"
   type        = string
   default     = "https://github.com/hmcts/github-repository-rules"
-}
-
-variable "batch_size" {
-  type    = number
-  default = 20
 }
