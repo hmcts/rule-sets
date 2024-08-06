@@ -23,14 +23,6 @@ This Terraform configuration automates the process of setting up rule sets acros
 - [Terraform](https://www.terraform.io/downloads.html) (version 1.5.7 or later)
 - Oauth or PAT Token with appropriate permissions.
 
-### Configuration
-
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/hmcts/github-repository-rules.git
-2. Create a `terraform.tfvars` file with your Oauth token:
-3. The python file runs gets ran as a cron job via a GitHub Actions pipeline at midnight and updates the JSON file with new repositories.
 
 ## What This Does
 
