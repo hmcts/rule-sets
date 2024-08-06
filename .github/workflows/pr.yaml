@@ -1,7 +1,7 @@
 name: Pull Request
 
 on:
-  pull_request:
+  push:
     branches:
       - master
   workflow_dispatch:
@@ -25,6 +25,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
     
+    # Log into Azure with OIDC integration  
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
