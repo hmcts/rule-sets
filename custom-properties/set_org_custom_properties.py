@@ -26,6 +26,15 @@ headers = {
 def define_custom_property(org_name):
     """
     Define a custom property for the organization.
+
+    Args:
+        org_name (str): The name of the GitHub organization.
+
+    Returns:
+        int: The status code of the API response.
+
+    Raises:
+        requests.RequestException: If the API request fails.
     """
     url = f"{API_BASE}/orgs/{org_name}/properties/schema/is_production"
     data = {
@@ -45,6 +54,16 @@ def define_custom_property(org_name):
 def set_custom_properties(repo_full_name, properties):
     """
     Set custom properties for a repository.
+
+    Args:
+        repo_full_name (str): The full name of the repository (org/repo).
+        properties (dict): The custom properties to set.
+
+    Returns:
+        int: The status code of the API response.
+
+    Raises:
+        requests.RequestException: If the API request fails.
     """
     owner, repo = repo_full_name.split('/')
     url = f"{API_BASE}/repos/{owner}/{repo}/properties/values"
@@ -63,6 +82,15 @@ def set_custom_properties(repo_full_name, properties):
 def get_custom_properties(repo_full_name):
     """
     Get custom properties for a repository.
+
+    Args:
+        repo_full_name (str): The full name of the repository (org/repo).
+
+    Returns:
+        dict: The custom properties of the repository.
+
+    Raises:
+        requests.RequestException: If the API request fails.
     """
     owner, repo = repo_full_name.split('/')
     url = f"{API_BASE}/repos/{owner}/{repo}/properties/values"
@@ -73,6 +101,14 @@ def get_custom_properties(repo_full_name):
 def load_production_repos():
     """
     Load production repositories from production-repos.json file.
+
+    Returns:
+        list: A list of production repositories.
+
+    Raises:
+        FileNotFoundError: If the JSON file is not found.
+        json.JSONDecodeError: If the JSON file cannot be decoded.
+        Exception: If there is an unexpected error reading the file.
     """
     script_dir = os.path.dirname(__file__)
     json_file_path = os.path.join(script_dir, '../production-repos.json')
