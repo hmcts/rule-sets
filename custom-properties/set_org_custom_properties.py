@@ -33,7 +33,7 @@ def define_custom_property(org_name):
         "required": False,
         "default_value": "",
         "description": "Indicates if the repository is in production",
-        "allowed_values": ["true", "false"],
+        "allowed_values": None,  # Set to None as required by API
         "values_editable_by": "org_and_repo_actors"
     }
     response = requests.put(url, headers=headers, json=data)
@@ -110,7 +110,6 @@ for repo in production_repos:
     logging.info(f"- {repo}")
 
 # Apply custom properties to each repository and verify
-repo_ids = []
 for repo_name in production_repos:
     repo_full_name = f"{ORG_NAME}/{repo_name}"
     custom_properties = {
