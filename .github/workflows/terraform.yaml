@@ -1,5 +1,4 @@
-name: CI/CD Pipeline
-
+name: Terraform CI/CD
 on:
   pull_request:
     branches:
@@ -7,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - DTSPO-18104-typo-file-V2
   workflow_dispatch:
 
 env:
@@ -18,10 +18,9 @@ permissions:
   pull-requests: write
   contents: read
 
-jobs:
+jobs: 
   terraform:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -41,21 +40,21 @@ jobs:
 
     - name: List Repositories and Branches
       run: |
-          echo "Checking Repositories and Branches"
-          cat ./production-repos.json
-          for repo in $(jq -r '.[]' ./production-repos.json); do
-            echo "Checking repository: $repo"
+        echo "Checking Repositories and Branches"
+        cat ./production-repos.json
+        for repo in $(jq -r '.[]' ./production-repos.json); do
+          echo "Checking repository: $repo"
+          curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/hmcts/$repo
+    
+          for branch in main master; do
+            echo "Checking branch: $branch in repository: $repo"
             curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
                  -H "Accept: application/vnd.github.v3+json" \
-                 https://api.github.com/repos/hmcts/$repo
-    
-            for branch in main master; do
-              echo "Checking branch: $branch in repository: $repo"
-              curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
-                   -H "Accept: application/vnd.github.v3+json" \
-                   https://api.github.com/repos/hmcts/$repo/branches/$branch
-            done
+                 https://api.github.com/repos/hmcts/$repo/branches/$branch
           done
+        done
 
     - name: Terraform Init
       working-directory: components
@@ -67,14 +66,16 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME"
+      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME" -reconfigure
 
-    - name: Terraform Format
+    - name: Terraform format
       working-directory: components
+      id: fmt
       run: terraform fmt -check
 
-    - name: Terraform Validate
+    - name: Terraform validate
       working-directory: components
+      id: validate
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -82,8 +83,9 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       run: terraform validate
 
-    - name: Terraform Plan
+    - name: Terraform plan
       working-directory: components
+      id: plan
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -93,13 +95,12 @@ jobs:
       run: terraform plan -var="oauth_token=${{ secrets.OAUTH_TOKEN }}"
 
     - name: Terraform Apply
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       working-directory: components
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: terraform apply -var="oauth_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
-

@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 # File path for the JSON file
 JSON_FILE_PATH = os.path.join(os.path.dirname(__file__), '../production-repos.json')
-README_FILE_PATH = os.path.join(os.path.dirname(__file__), '../readme1.md')  # Ensure correct case
+README_FILE_PATH = os.path.join(os.path.dirname(__file__), '../readme.md')  # Ensure correct case
 
 def load_repos(file_path):
     """
