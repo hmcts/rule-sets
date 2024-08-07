@@ -102,3 +102,4 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
       run: terraform apply -var="oauth_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
+      
