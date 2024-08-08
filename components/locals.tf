@@ -1,8 +1,6 @@
 locals {
   # List of repositories to exclude from the production-repos.json file
-  excluded_repositories = [
-    "test-repo-uteppyig",
-  ]
+  excluded_repositories = [] # Add any repositories here you would like to exclude
 
   # Read repositories from JSON file
   all_repositories = jsondecode(data.local_file.repos_json.content)

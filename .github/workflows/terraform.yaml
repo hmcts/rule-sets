@@ -1,4 +1,5 @@
 name: Terraform CI/CD
+
 on:
   pull_request:
     branches:
@@ -20,6 +21,7 @@ permissions:
 jobs: 
   terraform:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -41,11 +43,14 @@ jobs:
       run: |
         echo "Checking Repositories and Branches"
         cat ./production-repos.json
-        for repo in $(jq -r '.[]' ./production-repos.json); do
+        for repo in $(jq -r '.[]' < ./production-repos.json); do
           echo "Checking repository: $repo"
           curl -H "Authorization: token ${{ secrets.OAUTH_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/hmcts/$repo
+        done
+      shell: /bin/bash
+
 
     - name: Terraform Init
       working-directory: components

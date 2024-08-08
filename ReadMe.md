@@ -4,7 +4,7 @@ This repository contains code to manage GitHub repository branch protection rule
 
 # Overview
 
-This Terraform configuration automates the process of setting up rule sets across multiple GitHub repositories. It implements a batching system to handle a large number of repositories efficiently while respecting GitHub API rate limits.
+This Terraform configuration automates the process of setting up rule sets at the organisation level.
 
 - [Rate Limits Page](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
 
@@ -27,9 +27,8 @@ This Terraform configuration automates the process of setting up rule sets acros
 ## What This Does
 
 - Reads a list of repositories from `production-repos.json`
-- Creates rule sets on the repositories read from the JSON file, applying standardisation across all repositories.
-- Creates custom properties to tag and categorize repositories, such as marking repositories as "in production."
-- Processes repositories in batches to manage API rate limits.
+- Creates a ruleset at the organisation level, this applies standardisation across all repositories.
+- Creates custom properties for repositories, such as marking repositories as "is_production."
 
 
 ## Maintenance
@@ -39,7 +38,7 @@ To add or remove repositories follow the below:
 1. Open a fresh PR from the master branch ensuring you have pulled down recent changes to the master branch.
 2. Applies standardized rule sets to repositories listed in the `production-repos.json` file, ensuring consistent management and configuration across all repositories.
 3. Create a PR and allow the GH Actions pipeline to run a Terraform Plan to confirm changes are accepted.
-4. Once this first pipeline checks out, the second pipeline will apply your changes and update the branch protection rules.
+4. Once the plan is good, you can merge your PR into main branch and the pipeline will trigger an apply.
 5. Once applied delete your branch.
 
 
