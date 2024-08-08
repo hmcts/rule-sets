@@ -36,7 +36,7 @@ This Terraform configuration automates the process of setting up rule sets at th
 To add or remove repositories follow the below:
 
 1. Open a fresh PR from the master branch ensuring you have pulled down recent changes to the master branch.
-2. Applies standardized rule sets to repositories listed in the `production-repos.json` file, ensuring consistent management and configuration across all repositories.
+2. Applies standardised rule sets to repositories listed in the `production-repos.json` file, ensuring consistent management and configuration across all repositories.
 3. Create a PR and allow the GH Actions pipeline to run a Terraform Plan to confirm changes are accepted.
 4. Once the plan is good, you can merge your PR into main branch and the pipeline will trigger an apply.
 5. Once applied delete your branch.
