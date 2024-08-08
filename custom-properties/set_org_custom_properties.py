@@ -3,7 +3,7 @@ import requests
 import json
 import logging
 
-# Setup logging
+# Set up logging
 logging.basicConfig(level=logging.INFO)
 
 # GitHub API base URL
@@ -14,8 +14,8 @@ TOKEN = os.environ.get('OAUTH_TOKEN')
 if not TOKEN:
     raise ValueError("OAUTH_TOKEN environment variable is not set")
 
-# Your organization name
-ORG_NAME = "hmcts-test"
+# Your organisation name
+ORG_NAME = "hmcts"
 
 # Headers for API requests
 headers = {
@@ -25,10 +25,10 @@ headers = {
 
 def define_custom_property(org_name):
     """
-    Define a custom property for the organization.
+    Define a custom property for the organisation.
 
     Args:
-        org_name (str): The name of the GitHub organization.
+        org_name (str): The name of the GitHub organisation.
 
     Returns:
         int: The status code of the API response.
@@ -104,11 +104,6 @@ def load_production_repos():
 
     Returns:
         list: A list of production repositories.
-
-    Raises:
-        FileNotFoundError: If the JSON file is not found.
-        json.JSONDecodeError: If the JSON file cannot be decoded.
-        Exception: If there is an unexpected error reading the file.
     """
     script_dir = os.path.dirname(__file__)
     json_file_path = os.path.join(script_dir, '../production-repos.json')
@@ -131,7 +126,7 @@ def load_production_repos():
         logging.error(f"Unexpected error reading {json_file_path}: {e}")
         raise
 
-# Define the custom property at the organization level
+# Define the custom property at the organisation level
 try:
     status = define_custom_property(ORG_NAME)
     logging.info(f"Defined custom property for {ORG_NAME}: Status {status}")

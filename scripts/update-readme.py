@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 # File path for the JSON file
 JSON_FILE_PATH = os.path.join(os.path.dirname(__file__), '../production-repos.json')
-README_FILE_PATH = os.path.join(os.path.dirname(__file__), '../readme.md')  # Ensure correct case
+README_FILE_PATH = os.path.join(os.path.dirname(__file__), '../readme.md')
 
 def load_repos(file_path):
     """
@@ -78,7 +78,7 @@ try:
     logging.info(f"Number of production repositories: {production_count}")
     
     # Placeholder value for dev repo count, can be updated similarly
-    development_count = 0  # Update this to load actual data if available
+    development_count = 0
     
     # Link to the production-repos.json file in the repository
     prod_link = "https://github.com/hmcts/github-repository-rules/blob/DTSPO-18104-typo-file-V2/production-repos.json"

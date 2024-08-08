@@ -3,7 +3,7 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = "hmcts-test"
+  owner = "hmcts"
   token = var.oauth_token
 }
 
