@@ -25,7 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-  
+        with:
+          path: .
+
       - name: Checkout cnp-azuredevops-libraries
         uses: actions/checkout@v4
         with:
@@ -38,7 +40,6 @@ jobs:
   
       - name: Setup Terraform
         run: ./cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
-        working-directory: components
         shell: bash
   
       - name: Run Pre-commit
@@ -50,11 +51,16 @@ jobs:
       - name: Auto Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          file_pattern: environments/* components/* modules/*
+          file_pattern: components/*
 
   terraform:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: .
+
       - name: Az CLI login
         uses: azure/login@v1
         with:
