@@ -27,17 +27,21 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 resource "github_organization_ruleset" "default_ruleset" {
-  name        = "Default Rule Set"
-  target      = "branch"
+  name   = "Default Rule Set"
+
+  target = "branch"
+
   enforcement = "active"
 
   conditions {
     ref_name {
       include = ["refs/heads/main", "refs/heads/master"]
+
       exclude = []
     }
     repository_name {
       include = local.included_repositories
+
       exclude = []
     }
   }
@@ -46,6 +50,7 @@ resource "github_organization_ruleset" "default_ruleset" {
     creation                = null
     update                  = null
     deletion                = false
+    
     required_linear_history = true
 
     pull_request {
