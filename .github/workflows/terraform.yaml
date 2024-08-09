@@ -110,4 +110,3 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           GITHUB_TOKEN: ${{ secrets.OAUTH_TOKEN }}
         run: terraform apply -var="oauth_token=${{ secrets.OAUTH_TOKEN }}" -auto-approve
-        
