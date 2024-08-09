@@ -63,7 +63,7 @@ jobs:
           subscription-id: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
 
       - name: Terraform Init
-        working-directory: components
+        working-directory: ./components
         env:
           STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
           CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
@@ -75,7 +75,7 @@ jobs:
         run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME" -reconfigure
 
       - name: Terraform Validate
-        working-directory: components
+        working-directory: ./components
         id: validate
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -85,7 +85,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: components
+        working-directory: ./components
         id: plan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: Terraform Apply
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: components
+        working-directory: ./components
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.DCD_CFT_SANDBOX_SUBSCRIPTION }}
